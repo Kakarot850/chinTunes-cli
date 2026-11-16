@@ -76,10 +76,13 @@ class SyncCoordinator:
         jio_matched_id = None
         matched_artist = track.artist
 
-        # 1. High-Fidelity JioSaavn 320k Direct Stream (Near-0% CPU, direct HTTP stream)
-        if cfg.get("prefer_jiosaavn_320k", True) and not self._stop_event.is_set():
+        # 1. High-Fidelity JioSaavn Direct Stream
+        # Only use JioSaavn if the playlist/track origin itself is JioSaavn.
+        # For all other sources (YouTube, Spotify, etc.), default to YouTube Music/yt-dlp.
+        is_jiosaavn_source = (track.provider == "jiosaavn")
+        if is_jiosaavn_source and cfg.get("prefer_jiosaavn_320k", True) and not self._stop_event.is_set():
             cdn_url = track.cdn_url
-            if not cdn_url and source_used in ("youtube", "spotify"):
+            if not cdn_url:
                 matches = self.registry.jiosaavn.search_songs(f"{track.title} {track.artist}".strip(), limit=3)
                 if matches and matches[0].cdn_url:
                     cdn_url = matches[0].cdn_url

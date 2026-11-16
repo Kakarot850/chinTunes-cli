@@ -205,3 +205,50 @@ class TestCoordinatorAndTagger:
             assert "#EXTM3U" in content
             assert "Track One" in content
             assert "Track One - Artist - [test123].mp3" in content
+
+    def test_jiosaavn_routing_only_for_jiosaavn_provider(self, tmp_path, monkeypatch):
+        """Verify that non-JioSaavn tracks (e.g. YouTube, Spotify) do not search JioSaavn and default to YouTube."""
+        cfg_mgr = ConfigManager(str(tmp_path / "cfg.json"))
+        registry = ProviderRegistry()
+        coordinator = SyncCoordinator(cfg_mgr, registry)
+
+        # Track mock to ensure search_songs is never called for non-jiosaavn tracks
+        jio_search_called = []
+        monkeypatch.setattr(
+            registry.jiosaavn,
+            "search_songs",
+            lambda query, limit=3: jio_search_called.append(query) or []
+        )
+
+        # Mock yt_dlp extraction
+        class DummyYDL:
+            def __init__(self, opts):
+                self.opts = opts
+            def __enter__(self):
+                return self
+            def __exit__(self, *args):
+                pass
+            def extract_info(self, url, download=True):
+                # Write a dummy downloaded file
+                outtmpl = self.opts.get("outtmpl", "")
+                dummy_path = outtmpl.replace("%(title)s", "Song").replace("%(artist,creator,uploader)s", "Artist").replace("%(ext)s", "mp3")
+                with open(dummy_path, "wb") as f:
+                    f.write(b"dummy audio content")
+                return {"title": "Song", "artist": "Artist", "duration": 120}
+
+        import yt_dlp
+        monkeypatch.setattr(yt_dlp, "YoutubeDL", DummyYDL)
+
+        yt_track = TrackMetadata(id="yt123", title="Song", artist="Artist", album="Album", provider="youtube")
+        out_dir = str(tmp_path / "downloads")
+        os.makedirs(out_dir, exist_ok=True)
+
+        res = coordinator.process_track(yt_track, out_dir)
+        assert res.success is True
+        assert res.source == "youtube"
+        assert len(jio_search_called) == 0  # JioSaavn was NOT called
+
+        # Now test a jiosaavn track with no direct cdn_url - it SHOULD call search_songs
+        jio_track = TrackMetadata(id="jio123", title="Song", artist="Artist", album="Album", provider="jiosaavn")
+        coordinator.process_track(jio_track, out_dir)
+        assert len(jio_search_called) == 1  # JioSaavn was called as expected
