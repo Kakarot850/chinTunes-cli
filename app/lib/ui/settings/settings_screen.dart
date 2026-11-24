@@ -111,6 +111,13 @@ class SettingsScreen extends ConsumerWidget {
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.go('/library/downloads'),
           ),
+          SwitchListTile(
+            secondary: const Icon(Icons.save_alt_rounded),
+            title: const Text('Cache songs while streaming'),
+            subtitle: const Text('Replays use no data. Turn off if scrolling stutters during playback.'),
+            value: ref.watch(streamCacheProvider),
+            onChanged: (v) => unawaited(ref.read(streamCacheProvider.notifier).set(v)),
+          ),
           ListTile(
             leading: const Icon(Icons.cached_rounded),
             title: const Text('Stream cache'),

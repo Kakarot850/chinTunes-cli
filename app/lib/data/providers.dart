@@ -99,6 +99,19 @@ class MusicOnlyNotifier extends Notifier<bool> {
   }
 }
 
+class StreamCacheNotifier extends Notifier<bool> {
+  @override
+  bool build() => ref.watch(libraryStoreProvider).streamCacheEnabled();
+
+  Future<void> set(bool value) async {
+    state = value;
+    await ref.read(libraryStoreProvider).setStreamCacheEnabled(value);
+  }
+}
+
+/// Settings → "Stream cache" (LockCachingAudioSource for the current track).
+final streamCacheProvider = NotifierProvider<StreamCacheNotifier, bool>(StreamCacheNotifier.new);
+
 /// "Music only" filter for YouTube likes / history.
 final musicOnlyProvider = NotifierProvider<MusicOnlyNotifier, bool>(MusicOnlyNotifier.new);
 

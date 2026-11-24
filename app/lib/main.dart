@@ -58,6 +58,7 @@ Future<void> main() async {
       localize: downloads.localize,
       cache: cache,
       allowPrefetch: () => NetworkPolicy.allowPrefetch(core.resolver.dataMode, network.kind),
+      cacheEnabled: store.streamCacheEnabled,
       usage: usage,
     ),
     config: const AudioServiceConfig(

@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -41,19 +41,54 @@ class _AppShellState extends ConsumerState<AppShell> {
     super.dispose();
   }
 
+  bool _confirming = false;
+
+  /// System back at the root of a tab: other tabs → Home; Home → confirm exit.
+  /// (Back inside a tab's stack or on /player is handled by go_router first.)
+  Future<void> _onRootBack() async {
+    final shell = widget.navigationShell;
+    if (shell.currentIndex != 0) {
+      shell.goBranch(0);
+      return;
+    }
+    if (_confirming) return;
+    _confirming = true;
+    final playing = ref.read(isPlayingProvider);
+    final exit = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Exit chinTunes?'),
+        content: Text(playing ? 'Playback will stop.' : 'You can come back any time.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: const Text('Exit')),
+        ],
+      ),
+    );
+    _confirming = false;
+    if (exit != true) return;
+    await ref.read(audioHandlerProvider).stop();
+    await SystemNavigator.pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     final shell = widget.navigationShell;
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) unawaited(_onRootBack());
+      },
+      child: Scaffold(
       extendBody: true,
       body: shell,
-      bottomNavigationBar: ClipRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+      // No BackdropFilter: a full-width blur re-rendered on every scroll frame
+      // and every 200 ms progress tick, which made lists stutter (B-033).
+      bottomNavigationBar: RepaintBoundary(
           child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: AppColors.elevated.withValues(alpha: 0.78),
-              border: const Border(top: BorderSide(color: AppColors.border)),
+            decoration: const BoxDecoration(
+              color: Color(0xF51C1C22), // AppColors.elevated at 96%
+              border: Border(top: BorderSide(color: AppColors.border)),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -83,7 +118,7 @@ class _AppShellState extends ConsumerState<AppShell> {
               ],
             ),
           ),
-        ),
+      ),
       ),
     );
   }

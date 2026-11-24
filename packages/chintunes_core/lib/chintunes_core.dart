@@ -40,5 +40,6 @@ export 'src/stream_resolver.dart';
 export 'src/util/artist_name.dart';
 export 'src/util/html_text.dart';
 export 'src/util/image_url.dart';
+export 'src/youtube/innertube_player.dart';
 export 'src/youtube/youtube_explode_source.dart';
 export 'src/youtube/youtube_source.dart';

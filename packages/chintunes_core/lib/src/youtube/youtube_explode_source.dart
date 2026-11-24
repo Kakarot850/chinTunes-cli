@@ -6,6 +6,7 @@ import '../models/collection.dart';
 import '../models/resolved_stream.dart';
 import '../models/track.dart';
 import '../util/artist_name.dart';
+import 'innertube_player.dart';
 import 'youtube_source.dart';
 
 /// [YouTubeSource] backed by `youtube_explode_dart`.
@@ -13,9 +14,15 @@ import 'youtube_source.dart';
 /// Gotcha: YouTube changes its player regularly; when extraction breaks,
 /// bump `youtube_explode_dart` first (see BUG_REPORT.md B-005).
 class YoutubeExplodeSource implements YouTubeSource {
-  YoutubeExplodeSource() : _yt = yt.YoutubeExplode();
+  YoutubeExplodeSource({InnerTubePlayerClient? player})
+      : _yt = yt.YoutubeExplode(),
+        _player = player ?? InnerTubePlayerClient();
 
   final yt.YoutubeExplode _yt;
+
+  /// Primary stream extractor (visionOS client, B-032). youtube_explode is
+  /// only the fallback for streams; it still does search / metadata.
+  final InnerTubePlayerClient _player;
 
   Track _toTrack(yt.Video v) => Track(
         id: v.id.value,
@@ -44,17 +51,28 @@ class YoutubeExplodeSource implements YouTubeSource {
   Future<ResolvedStream> resolveAudio(String videoId, {DataMode mode = DataMode.high}) async {
     // Only stream *metadata* is fetched here; audio-only renditions are the
     // only candidates, so video bytes are never requested.
-    final manifest = await _yt.videos.streamsClient.getManifest(videoId);
-    final candidates = manifest.audioOnly
-        .map((s) => AudioStreamCandidate(
-              itag: s.tag,
-              bitrateKbps: s.bitrate.kiloBitsPerSecond.round(),
-              codec: s.audioCodec,
-              container: s.container.name,
-              url: s.url,
-              sizeBytes: s.size.totalBytes,
-            ))
-        .toList();
+    List<AudioStreamCandidate> candidates;
+    try {
+      candidates = await _player.audioStreams(videoId);
+    } catch (primaryError) {
+      // Fallback: youtube_explode's own clients (403-prone since 2026-08).
+      try {
+        final manifest = await _yt.videos.streamsClient.getManifest(videoId);
+        candidates = manifest.audioOnly
+            .map((s) => AudioStreamCandidate(
+                  itag: s.tag,
+                  bitrateKbps: s.bitrate.kiloBitsPerSecond.round(),
+                  codec: s.audioCodec,
+                  container: s.container.name,
+                  url: s.url,
+                  sizeBytes: s.size.totalBytes,
+                ))
+            .toList();
+      } catch (_) {
+        if (primaryError is StreamResolveException) rethrow;
+        throw StreamResolveException('YouTube stream lookup failed for $videoId: $primaryError');
+      }
+    }
     final pick = StreamSelector.pickYouTube(candidates, mode);
     if (pick == null) throw StreamResolveException('No audio-only stream for $videoId');
     return ResolvedStream(

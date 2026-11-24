@@ -41,11 +41,13 @@ class ChinTunesAudioHandler extends BaseAudioHandler with SeekHandler {
     Track Function(Track track)? localize,
     AudioCache? cache,
     bool Function()? allowPrefetch,
+    bool Function()? cacheEnabled,
     DataUsageMeter? usage,
   })  : _resolver = resolver,
         _localize = localize ?? ((t) => t),
         _cache = cache,
         _allowPrefetch = allowPrefetch ?? (() => true),
+        _cacheEnabled = cacheEnabled ?? (() => true),
         _usage = usage {
     _subs.addAll([
       _player.playbackEventStream.listen((_) => _broadcastState(), onError: _onPlayerError),
@@ -67,6 +69,7 @@ class ChinTunesAudioHandler extends BaseAudioHandler with SeekHandler {
   final Track Function(Track track) _localize;
   final AudioCache? _cache;
   final bool Function() _allowPrefetch;
+  final bool Function() _cacheEnabled;
   final DataUsageMeter? _usage;
 
   final AudioPlayer _player = AudioPlayer();
@@ -316,7 +319,12 @@ class ChinTunesAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   /// Builds the audio source for [original] (offline → cache → network).
-  Future<_Prepared> _prepare(Track original) async {
+  ///
+  /// [useCache] wraps network streams in [LockCachingAudioSource]. Its proxy
+  /// downloads the whole file on the UI isolate, so it is used for the
+  /// current track only; prefetched tracks go through ExoPlayer's native
+  /// HTTP stack (B-033).
+  Future<_Prepared> _prepare(Track original, {bool useCache = true}) async {
     final track = _localize(original);
     final tag = _mediaItemFor(original);
 
@@ -337,7 +345,7 @@ class ChinTunesAudioHandler extends BaseAudioHandler with SeekHandler {
 
     // Headers are deliberately not forwarded (B-006): neither JioSaavn's CDN
     // nor googlevideo needs them.
-    final cacheFile = _cache?.fileFor(original, _resolver.dataMode);
+    final cacheFile = (useCache && _cacheEnabled()) ? _cache?.fileFor(original, _resolver.dataMode) : null;
     final AudioSource source = cacheFile == null
         ? AudioSource.uri(stream.uri, tag: tag)
         // Experimental in just_audio, but it is the only built-in byte cache.
@@ -443,7 +451,7 @@ class ChinTunesAudioHandler extends BaseAudioHandler with SeekHandler {
     final loadToken = _loadToken;
     final prefetchToken = ++_prefetchToken;
     try {
-      final prepared = await _prepare(track);
+      final prepared = await _prepare(track, useCache: false);
       final source = _source;
       if (loadToken != _loadToken || prefetchToken != _prefetchToken || source == null) return;
       await source.add(prepared.source);

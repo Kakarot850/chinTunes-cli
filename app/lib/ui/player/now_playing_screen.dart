@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chintunes_core/chintunes_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,6 +12,7 @@ import '../../data/providers.dart';
 import '../widgets/artwork.dart';
 import '../widgets/seek_bar.dart';
 import '../widgets/state_views.dart';
+import '../widgets/track_actions.dart';
 import 'mini_player.dart';
 import 'player_controls.dart';
 import 'queue_sheet.dart';
@@ -80,23 +82,35 @@ class NowPlayingScreen extends ConsumerWidget {
                           ),
                         ),
                         IconButton(
-                          tooltip: 'Queue',
-                          icon: const Icon(Icons.queue_music_rounded),
-                          onPressed: () => unawaited(showQueueSheet(context)),
+                          tooltip: 'More options',
+                          icon: const Icon(Icons.more_vert_rounded),
+                          onPressed: () => unawaited(showTrackActions(context, track)),
                         ),
                       ],
                     ),
                   ),
                   const Spacer(),
-                  Hero(
-                    tag: kNowPlayingArtHero,
-                    child: LayoutBuilder(
-                      builder: (context, c) {
-                        // Cap by height too so small phones never overflow the column.
-                        final maxByHeight = MediaQuery.sizeOf(context).height * 0.42;
-                        final size = c.maxWidth.clamp(0.0, maxByHeight.clamp(160.0, 420.0)).toDouble();
-                        return Artwork(url: artUrl, size: size, radius: 16);
-                      },
+                  // Swipe the artwork left / right to change songs.
+                  GestureDetector(
+                    onHorizontalDragEnd: (d) {
+                      final v = d.primaryVelocity ?? 0;
+                      if (v.abs() < 300) return;
+                      unawaited(HapticFeedback.selectionClick());
+                      unawaited(v < 0 ? handler.skipToNext() : handler.skipToPrevious());
+                    },
+                    child: Hero(
+                      tag: kNowPlayingArtHero,
+                      child: LayoutBuilder(
+                        builder: (context, c) {
+                          // Cap by height too so small phones never overflow the column.
+                          final maxByHeight = MediaQuery.sizeOf(context).height * 0.42;
+                          final size = c.maxWidth.clamp(0.0, maxByHeight.clamp(160.0, 420.0)).toDouble();
+                          return AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 220),
+                            child: Artwork(key: ValueKey(item.id), url: artUrl, size: size, radius: 16),
+                          );
+                        },
+                      ),
                     ),
                   ),
                   const SizedBox(height: 28),
@@ -126,7 +140,7 @@ class NowPlayingScreen extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  PlayerSeekBar(duration: item.duration),
+                  RepaintBoundary(child: PlayerSeekBar(duration: item.duration)),
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

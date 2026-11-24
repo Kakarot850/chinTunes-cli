@@ -59,6 +59,7 @@ class LibraryStore {
   static const String _dataModeKey = 'data_mode';
   static const String _dataUsageKey = 'data_usage';
   static const String _musicOnlyKey = 'yt_music_only';
+  static const String _streamCacheKey = 'stream_cache_enabled';
 
   final Box<dynamic> _liked;
   final Box<dynamic> _history;
@@ -269,6 +270,10 @@ class LibraryStore {
   }
 
   Future<void> saveDataUsage(Map<String, int> json) => _prefs.put(_dataUsageKey, json);
+
+  bool streamCacheEnabled() => (_prefs.get(_streamCacheKey) as bool?) ?? true;
+
+  Future<void> setStreamCacheEnabled(bool value) => _prefs.put(_streamCacheKey, value);
 
   bool youtubeMusicOnly() => (_prefs.get(_musicOnlyKey) as bool?) ?? true;
 
