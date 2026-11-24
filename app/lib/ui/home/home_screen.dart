@@ -85,9 +85,9 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       body: RefreshIndicator(
-        onRefresh: () async {
+        onRefresh: () {
           ref.invalidate(homeRadioProvider);
-          await ref.refresh(homeFeedProvider.future);
+          return ref.refresh(homeFeedProvider.future);
         },
         child: CustomScrollView(
           slivers: [
