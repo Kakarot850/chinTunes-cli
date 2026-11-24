@@ -91,7 +91,8 @@ class CatalogService {
         final track = await _youtube.video(target.id) ??
             Track(id: target.id, source: TrackSource.youtube, title: 'YouTube video', webUrl: url);
         return _single(track);
-      case TrackSource.local:
+      case TrackSource.local || TrackSource.deezer || TrackSource.appleMusic:
+        // Deezer / Apple Music links are handled by PlaylistImporter.
         throw CatalogException('Unsupported link');
     }
   }

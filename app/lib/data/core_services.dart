@@ -12,6 +12,7 @@ class CoreServices {
     required this.lyrics,
     required this.mixes,
     required this.usage,
+    required this.importer,
   });
 
   factory CoreServices.create({DataMode dataMode = DataMode.balanced, DataUsageMeter? usage}) {
@@ -28,6 +29,7 @@ class CoreServices {
       lyrics: LyricsService(lrclib: LrclibClient(), jiosaavn: jiosaavn),
       mixes: MixEngine(innertube: InnerTubeClient(), youtube: youtube),
       usage: usage ?? DataUsageMeter(),
+      importer: PlaylistImporter(jiosaavn: jiosaavn, youtube: youtube),
     );
   }
 
@@ -40,4 +42,5 @@ class CoreServices {
   final LyricsService lyrics;
   final MixEngine mixes;
   final DataUsageMeter usage;
+  final PlaylistImporter importer;
 }

@@ -1,5 +1,26 @@
-/// Where a track's audio comes from.
-enum TrackSource { jiosaavn, youtube, spotify, local }
+/// Where a track came from. [jiosaavn] and [youtube] carry their own audio;
+/// [spotify], [deezer] and [appleMusic] are metadata-only (imported
+/// playlists) and play through a YouTube / JioSaavn match.
+enum TrackSource {
+  jiosaavn,
+  youtube,
+  spotify,
+  local,
+  deezer,
+  appleMusic;
+
+  bool get isMetadataOnly =>
+      this == TrackSource.spotify || this == TrackSource.deezer || this == TrackSource.appleMusic;
+
+  String get label => switch (this) {
+        TrackSource.jiosaavn => 'JioSaavn',
+        TrackSource.youtube => 'YouTube',
+        TrackSource.spotify => 'Spotify',
+        TrackSource.local => 'Offline',
+        TrackSource.deezer => 'Deezer',
+        TrackSource.appleMusic => 'Apple Music',
+      };
+}
 
 TrackSource _sourceFromName(Object? name) => TrackSource.values.firstWhere(
       (s) => s.name == name,

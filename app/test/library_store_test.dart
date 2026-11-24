@@ -103,6 +103,41 @@ void main() {
     expect(await store.downloadStore.loadAll(), isEmpty);
   });
 
+  test('synced playlist: import, mirror sync with diff, edits keep the link, stop syncing', () async {
+    Track sp(String id) => Track(id: id, source: TrackSource.spotify, title: 'Song $id');
+    final ref = PlaylistImporter.parseUrl('https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M')!;
+    final p = await store.createSyncedPlaylist(
+      RemotePlaylist(ref: ref, title: 'Top Hits', tracks: [sp('a'), sp('b')]),
+    );
+    expect(p.isSynced, isTrue);
+    expect(store.playlistForRef(ref)!.id, p.id);
+
+    // Upstream added c, removed a.
+    final diff = await store.applySync(p.id, RemotePlaylist(ref: ref, title: 'Top Hits', tracks: [sp('b'), sp('c')]));
+    expect(diff.added.map((t) => t.id), ['c']);
+    expect(diff.removed.map((t) => t.id), ['a']);
+    final synced = store.playlist(p.id)!;
+    expect(synced.tracks.map((t) => t.id), ['b', 'c']);
+    expect(synced.sync!.lastSummary, '+1 new, −1 removed');
+    expect(synced.sync!.lastSyncedAt, isNotNull);
+
+    // Rename must not drop the sync link (copyWith).
+    await store.renamePlaylist(p.id, 'My Top Hits');
+    expect(store.playlist(p.id)!.isSynced, isTrue);
+
+    // Re-importing the same link updates the existing mirror.
+    final again = await store.createSyncedPlaylist(RemotePlaylist(ref: ref, title: 'Top Hits', tracks: [sp('c')]));
+    expect(again.id, p.id);
+    expect(store.syncedPlaylists(), hasLength(1));
+
+    await store.markSyncError(p.id, 'offline');
+    expect(store.playlist(p.id)!.sync!.lastError, 'offline');
+
+    await store.stopSyncing(p.id);
+    expect(store.playlist(p.id)!.isSynced, isFalse);
+    expect(store.playlist(p.id)!.tracks.map((t) => t.id), ['c']);
+  });
+
   test('recent searches dedupe case-insensitively and cap', () async {
     await store.addSearch('Arijit');
     await store.addSearch('lofi');

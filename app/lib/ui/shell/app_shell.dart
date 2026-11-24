@@ -23,6 +23,7 @@ class AppShell extends ConsumerStatefulWidget {
 
 class _AppShellState extends ConsumerState<AppShell> {
   StreamSubscription<String>? _errorSub;
+  AppLifecycleListener? _lifecycle;
 
   @override
   void initState() {
@@ -33,10 +34,17 @@ class _AppShellState extends ConsumerState<AppShell> {
         ..hideCurrentSnackBar()
         ..showSnackBar(SnackBar(content: Text(message)));
     });
+    // Pull new songs into imported playlists on launch and whenever the app
+    // comes back to the foreground (B-044).
+    _autoSync();
+    _lifecycle = AppLifecycleListener(onResume: _autoSync);
   }
+
+  void _autoSync() => unawaited(ref.read(playlistSyncProvider).syncAll(onlyStale: true));
 
   @override
   void dispose() {
+    _lifecycle?.dispose();
     unawaited(_errorSub?.cancel());
     super.dispose();
   }

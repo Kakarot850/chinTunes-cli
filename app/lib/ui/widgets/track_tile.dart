@@ -25,8 +25,7 @@ class TrackTile extends ConsumerWidget {
     final downloaded = ref.watch(downloadedIdsProvider.select((ids) => ids.contains(track.uid)));
     final theme = Theme.of(context);
     final subtitle = [
-      if (track.source == TrackSource.youtube) 'YouTube',
-      if (track.source == TrackSource.spotify) 'Spotify',
+      if (track.source == TrackSource.youtube || track.source.isMetadataOnly) track.source.label,
       track.artist,
     ].join(' · ');
 

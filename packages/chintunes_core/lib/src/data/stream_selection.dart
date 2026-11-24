@@ -67,6 +67,11 @@ abstract final class StreamSelector {
   /// What High mode would stream for [track]; the baseline for "data saved".
   static int highBaselineKbps(Track track) => switch (track.source) {
         TrackSource.jiosaavn => track.has320 ? 320 : 160,
-        TrackSource.youtube || TrackSource.spotify || TrackSource.local => 160,
+        TrackSource.youtube ||
+        TrackSource.spotify ||
+        TrackSource.local ||
+        TrackSource.deezer ||
+        TrackSource.appleMusic =>
+          160,
       };
 }

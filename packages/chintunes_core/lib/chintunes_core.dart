@@ -18,6 +18,8 @@ export 'src/downloads/download_manager.dart';
 export 'src/downloads/download_store.dart';
 export 'src/downloads/download_task.dart';
 export 'src/http/dio_factory.dart';
+export 'src/importers/playlist_importer.dart';
+export 'src/importers/remote_playlist.dart';
 export 'src/jiosaavn/jiosaavn_client.dart';
 export 'src/jiosaavn/jiosaavn_crypto.dart';
 export 'src/jiosaavn/jiosaavn_parser.dart';

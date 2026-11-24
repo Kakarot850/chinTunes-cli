@@ -3,20 +3,79 @@ import 'dart:async';
 import 'package:chintunes_core/chintunes_core.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
-/// A user-created playlist stored locally.
+/// Link to a remote playlist that this local playlist mirrors (B-044).
+class PlaylistSyncInfo {
+  const PlaylistSyncInfo({required this.ref, this.lastSyncedAt, this.lastSummary, this.lastError, this.truncated = false});
+
+  final PlaylistRef ref;
+  final DateTime? lastSyncedAt;
+
+  /// e.g. "+3 new, −1 removed" / "Up to date".
+  final String? lastSummary;
+  final String? lastError;
+
+  /// The service only exposed the first ~100 songs.
+  final bool truncated;
+
+  PlaylistSyncInfo copyWith({DateTime? lastSyncedAt, String? lastSummary, String? lastError, bool clearError = false, bool? truncated}) =>
+      PlaylistSyncInfo(
+        ref: ref,
+        lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
+        lastSummary: lastSummary ?? this.lastSummary,
+        lastError: clearError ? null : (lastError ?? this.lastError),
+        truncated: truncated ?? this.truncated,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'ref': ref.toJson(),
+        if (lastSyncedAt != null) 'lastSyncedAt': lastSyncedAt!.millisecondsSinceEpoch,
+        if (lastSummary != null) 'lastSummary': lastSummary,
+        if (lastError != null) 'lastError': lastError,
+        'truncated': truncated,
+      };
+
+  static PlaylistSyncInfo? fromJson(Object? json) {
+    if (json is! Map) return null;
+    final ref = json['ref'];
+    if (ref is! Map) return null;
+    final at = json['lastSyncedAt'];
+    return PlaylistSyncInfo(
+      ref: PlaylistRef.fromJson(ref),
+      lastSyncedAt: at is int ? DateTime.fromMillisecondsSinceEpoch(at) : null,
+      lastSummary: json['lastSummary']?.toString(),
+      lastError: json['lastError']?.toString(),
+      truncated: json['truncated'] == true,
+    );
+  }
+}
+
+/// A user-created playlist stored locally, optionally mirroring a remote
+/// Spotify / YouTube / JioSaavn / Deezer / Apple Music playlist ([sync]).
 class LocalPlaylist {
-  const LocalPlaylist({required this.id, required this.name, required this.createdAt, this.tracks = const []});
+  const LocalPlaylist({required this.id, required this.name, required this.createdAt, this.tracks = const [], this.sync});
 
   final String id;
   final String name;
   final DateTime createdAt;
   final List<Track> tracks;
+  final PlaylistSyncInfo? sync;
+
+  bool get isSynced => sync != null;
+
+  LocalPlaylist copyWith({String? name, List<Track>? tracks, PlaylistSyncInfo? sync, bool clearSync = false}) => LocalPlaylist(
+        id: id,
+        name: name ?? this.name,
+        createdAt: createdAt,
+        tracks: tracks ?? this.tracks,
+        sync: clearSync ? null : (sync ?? this.sync),
+      );
 
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
         'createdAt': createdAt.millisecondsSinceEpoch,
         'tracks': tracks.map((t) => t.toJson()).toList(),
+        if (sync != null) 'sync': sync!.toJson(),
       };
 
   factory LocalPlaylist.fromJson(Map<dynamic, dynamic> json) => LocalPlaylist(
@@ -27,6 +86,7 @@ class LocalPlaylist {
             .whereType<Map<dynamic, dynamic>>()
             .map(Track.fromJson)
             .toList(),
+        sync: PlaylistSyncInfo.fromJson(json['sync']),
       );
 }
 
@@ -314,7 +374,7 @@ class LibraryStore {
   Future<void> renamePlaylist(String id, String name) async {
     final p = playlist(id);
     if (p == null || name.trim().isEmpty) return;
-    await _playlists.put(id, LocalPlaylist(id: id, name: name.trim(), createdAt: p.createdAt, tracks: p.tracks).toJson());
+    await _playlists.put(id, p.copyWith(name: name.trim()).toJson());
   }
 
   Future<void> deletePlaylist(String id) => _playlists.delete(id);
@@ -325,7 +385,7 @@ class LibraryStore {
     if (p == null || p.tracks.contains(track)) return false;
     await _playlists.put(
       id,
-      LocalPlaylist(id: id, name: p.name, createdAt: p.createdAt, tracks: [...p.tracks, track]).toJson(),
+      p.copyWith(tracks: [...p.tracks, track]).toJson(),
     );
     return true;
   }
@@ -334,7 +394,78 @@ class LibraryStore {
     final p = playlist(id);
     if (p == null || index < 0 || index >= p.tracks.length) return;
     final tracks = [...p.tracks]..removeAt(index);
-    await _playlists.put(id, LocalPlaylist(id: id, name: p.name, createdAt: p.createdAt, tracks: tracks).toJson());
+    await _playlists.put(id, p.copyWith(tracks: tracks).toJson());
+  }
+
+  // ------------------------------------------------------ synced playlists
+
+  List<LocalPlaylist> syncedPlaylists() => playlists().where((p) => p.isSynced).toList();
+
+  /// Existing local mirror of [ref], if already imported.
+  LocalPlaylist? playlistForRef(PlaylistRef ref) {
+    for (final p in syncedPlaylists()) {
+      final r = p.sync!.ref;
+      if (r.service == ref.service && r.kind == ref.kind && r.id == ref.id) return p;
+    }
+    return null;
+  }
+
+  Future<LocalPlaylist> createSyncedPlaylist(RemotePlaylist remote) async {
+    final existing = playlistForRef(remote.ref);
+    if (existing != null) {
+      await applySync(existing.id, remote);
+      return playlist(existing.id)!;
+    }
+    final p = LocalPlaylist(
+      id: 'pl_${_now()}',
+      name: remote.title,
+      createdAt: DateTime.now(),
+      tracks: remote.tracks,
+      sync: PlaylistSyncInfo(
+        ref: remote.ref,
+        lastSyncedAt: DateTime.now(),
+        lastSummary: 'Imported ${remote.tracks.length} songs',
+        truncated: remote.truncated,
+      ),
+    );
+    await _playlists.put(p.id, p.toJson());
+    return p;
+  }
+
+  /// Mirrors the remote playlist (remote order, new songs added, songs
+  /// removed upstream removed) and records the result.
+  Future<PlaylistDiff> applySync(String id, RemotePlaylist remote) async {
+    final p = playlist(id);
+    if (p == null || p.sync == null) return const PlaylistDiff(added: [], removed: [], kept: 0);
+    final diff = PlaylistDiff.compute(p.tracks, remote.tracks);
+    await _playlists.put(
+      id,
+      p
+          .copyWith(
+            tracks: remote.tracks,
+            sync: p.sync!.copyWith(
+              lastSyncedAt: DateTime.now(),
+              lastSummary: diff.summary,
+              clearError: true,
+              truncated: remote.truncated,
+            ),
+          )
+          .toJson(),
+    );
+    return diff;
+  }
+
+  Future<void> markSyncError(String id, String message) async {
+    final p = playlist(id);
+    if (p == null || p.sync == null) return;
+    await _playlists.put(id, p.copyWith(sync: p.sync!.copyWith(lastError: message)).toJson());
+  }
+
+  /// Keeps the songs but stops mirroring the remote playlist.
+  Future<void> stopSyncing(String id) async {
+    final p = playlist(id);
+    if (p == null) return;
+    await _playlists.put(id, p.copyWith(clearSync: true).toJson());
   }
 }
 

@@ -11,6 +11,7 @@ import '../../data/providers.dart';
 import '../widgets/artwork.dart';
 import '../widgets/state_views.dart';
 import '../widgets/track_actions.dart';
+import 'import_playlist_sheet.dart';
 
 class _IconBox extends StatelessWidget {
   const _IconBox({required this.icon, required this.color});
@@ -108,18 +109,42 @@ class LibraryScreen extends ConsumerWidget {
             subtitle: Text(signedIn ? 'Liked music, playlists and play history' : 'Play history · sign in for YouTube likes'),
             trailing: const Icon(Icons.chevron_right_rounded),
           ),
+          ListTile(
+            onTap: () => unawaited(showImportPlaylistSheet(context)),
+            leading: const _IconBox(icon: Icons.sync_alt_rounded, color: AppColors.accent),
+            title: const Text('Import playlist'),
+            subtitle: const Text('Spotify, YouTube, JioSaavn, Deezer, Apple Music · stays in sync'),
+            trailing: const Icon(Icons.add_link_rounded),
+          ),
           SectionHeader(
             'Playlists',
-            trailing: TextButton.icon(
-              onPressed: () => unawaited(_create(context, ref)),
-              icon: const Icon(Icons.add_rounded, size: 18),
-              label: const Text('New playlist'),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (playlists.any((p) => p.isSynced))
+                  IconButton(
+                    tooltip: 'Sync all imported playlists',
+                    icon: const Icon(Icons.sync_rounded),
+                    onPressed: () async {
+                      final messenger = ScaffoldMessenger.of(context);
+                      final added = await ref.read(playlistSyncProvider).syncAll();
+                      messenger.showSnackBar(SnackBar(
+                        content: Text(added == 0 ? 'All playlists are up to date.' : 'Synced: ${pluralize(added, 'new song')}.'),
+                      ));
+                    },
+                  ),
+                TextButton.icon(
+                  onPressed: () => unawaited(_create(context, ref)),
+                  icon: const Icon(Icons.add_rounded, size: 18),
+                  label: const Text('New playlist'),
+                ),
+              ],
             ),
           ),
           if (playlists.isEmpty)
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Text('Create a playlist, then add songs from any track\'s menu.'),
+              child: Text('Create a playlist, or import one from another app.'),
             ),
           for (final p in playlists)
             ListTile(
@@ -136,7 +161,28 @@ class LibraryScreen extends ConsumerWidget {
                     )
                   : Artwork(url: p.tracks.first.imageUrl, size: 52, radius: 6),
               title: Text(p.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-              subtitle: Text(pluralize(p.tracks.length, 'song')),
+              subtitle: Row(
+                children: [
+                  if (p.isSynced) ...[
+                    Icon(
+                      p.sync!.lastError == null ? Icons.sync_rounded : Icons.sync_problem_rounded,
+                      size: 14,
+                      color: p.sync!.lastError == null ? AppColors.accent : AppColors.danger,
+                    ),
+                    const SizedBox(width: 4),
+                  ],
+                  Flexible(
+                    child: Text(
+                      [
+                        if (p.isSynced) p.sync!.ref.service.label,
+                        pluralize(p.tracks.length, 'song'),
+                      ].join(' · '),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
               trailing: const Icon(Icons.chevron_right_rounded),
             ),
         ],

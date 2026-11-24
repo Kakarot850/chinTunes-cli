@@ -13,6 +13,7 @@ import 'core_services.dart';
 import 'google_account.dart';
 import 'library_store.dart';
 import 'network_monitor.dart';
+import 'playlist_sync.dart';
 
 // ---------------------------------------------------------------- roots
 // Overridden in main.dart (and in tests).
@@ -169,6 +170,17 @@ final ytPlaylistProvider = FutureProvider.autoDispose.family<MediaCollection, Co
 final historyEntriesProvider = StreamProvider<List<HistoryEntry>>((ref) {
   final musicOnly = ref.watch(musicOnlyProvider);
   return ref.watch(libraryStoreProvider).watchCombinedHistory(musicOnly: musicOnly);
+});
+
+// ------------------------------------------------- playlist import / sync
+
+final playlistSyncProvider = Provider<PlaylistSyncService>((ref) {
+  final service = PlaylistSyncService(
+    importer: ref.watch(coreServicesProvider).importer,
+    store: ref.watch(libraryStoreProvider),
+  );
+  ref.onDispose(service.dispose);
+  return service;
 });
 
 // ------------------------------------------------------ home radio feed

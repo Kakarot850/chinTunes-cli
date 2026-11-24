@@ -1,0 +1,45 @@
+{
+ "id": 3155776842,
+ "title": "Top Worldwide",
+ "description": "",
+ "nb_tracks": 4,
+ "picture_xl": "https://cdn-images.dzcdn.net/images/playlist/0b92c2f9e94a1a3650f0de769c4fc07c/1000x1000-000000-80-0-0.jpg",
+ "creator": {
+  "name": "Deezer Charts"
+ },
+ "tracks": {
+  "data": [
+   {
+    "id": 3895241341,
+    "title": "Boston",
+    "duration": 170,
+    "isrc": "QZJ842603468",
+    "readable": false,
+    "artist": {
+     "name": "STELLA LEFTY"
+    },
+    "album": {
+     "title": "Boston",
+     "cover_big": "https://cdn-images.dzcdn.net/images/cover/66d6baca9df5092af22a710ce10d39cf/500x500-000000-80-0-0.jpg",
+     "cover_xl": "https://cdn-images.dzcdn.net/images/cover/66d6baca9df5092af22a710ce10d39cf/1000x1000-000000-80-0-0.jpg"
+    }
+   },
+   {
+    "id": 3602074142,
+    "title": "Choosin' Texas",
+    "duration": 232,
+    "isrc": "USSM12504190",
+    "readable": false,
+    "artist": {
+     "name": "Ella Langley"
+    },
+    "album": {
+     "title": "Choosin' Texas",
+     "cover_big": "https://cdn-images.dzcdn.net/images/cover/749ad2ad7609ec768e342bec41078095/500x500-000000-80-0-0.jpg",
+     "cover_xl": "https://cdn-images.dzcdn.net/images/cover/749ad2ad7609ec768e342bec41078095/1000x1000-000000-80-0-0.jpg"
+    }
+   }
+  ],
+  "next": "https://api.deezer.com/playlist/3155776842/tracks?index=2"
+ }
+}

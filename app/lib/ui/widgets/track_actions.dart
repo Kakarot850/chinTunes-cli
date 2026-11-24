@@ -153,7 +153,8 @@ Future<void> showAddToPlaylist(
     useRootNavigator: true,
     isScrollControlled: true,
     builder: (sheetContext) {
-      final playlists = store.playlists();
+      // Synced playlists mirror another app; local additions would be dropped on sync.
+      final playlists = store.playlists().where((p) => !p.isSynced).toList();
       return SafeArea(
         child: ConstrainedBox(
           constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(sheetContext).height * 0.6),

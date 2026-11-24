@@ -79,7 +79,8 @@ class StreamResolver {
           if (match != null) return _resolveJioSaavn(match, effectiveMode, matched: true);
         }
         return _youtube.resolveAudio(track.id, mode: effectiveMode);
-      case TrackSource.spotify:
+      // Metadata-only tracks (imported Spotify / Deezer / Apple Music playlists).
+      case TrackSource.spotify || TrackSource.deezer || TrackSource.appleMusic:
         if (sourcePreference == MusicSource.jiosaavn) {
           final match = await _matchJioSaavn(track);
           if (match != null) return _resolveJioSaavn(match, effectiveMode, matched: true);
@@ -96,7 +97,7 @@ class StreamResolver {
   /// lands on a live stream, a Short or a long compilation that cannot be
   /// played, so up to [maxAttempts] ranked candidates are tried in order.
   Future<ResolvedStream> _viaYouTube(Track track, DataMode mode, {int maxAttempts = 3}) async {
-    final results = await _youtube.search('${track.title} ${track.artist} audio', limit: 8);
+    final results = await _youtube.search(youTubeQuery(track), limit: 8);
     final ranked = rankYouTubeMatches(results, track);
     if (ranked.isEmpty) {
       throw StreamResolveException('No YouTube match for "${track.title}"');
@@ -111,6 +112,18 @@ class StreamResolver {
     }
     if (lastError is StreamResolveException) throw lastError;
     throw StreamResolveException('No playable YouTube match for "${track.title}"');
+  }
+
+  /// Search query for matching a track on YouTube. Imported Spotify titles
+  /// carry long "(feat. …) [From …]" suffixes and 5-artist credits that hurt
+  /// search relevance, so brackets are dropped and only 2 artists are kept.
+  static String youTubeQuery(Track track) {
+    var title = track.title.replaceAll(RegExp(r'\s*[\(\[][^\)\]]*[\)\]]'), '').trim();
+    if (title.isEmpty) title = track.title;
+    final artists = track.artist == 'Unknown'
+        ? const <String>[]
+        : track.artist.split(RegExp(r'\s*,\s*|\s+&\s+')).where((a) => a.isNotEmpty).take(2).toList();
+    return [title, ...artists, 'audio'].join(' ');
   }
 
   /// Orders YouTube search results for playing [wanted]:

@@ -1,0 +1,34 @@
+{
+ "data": [
+  {
+   "id": 4208859922,
+   "title": "BbY WOW",
+   "duration": 225,
+   "isrc": "USUG12607940",
+   "readable": false,
+   "artist": {
+    "name": "KAROL G"
+   },
+   "album": {
+    "title": "NO ME ARREPIENTO DE SENTIR TANTO",
+    "cover_big": "https://cdn-images.dzcdn.net/images/cover/f794dd1931dac42fc13f938850b686c6/500x500-000000-80-0-0.jpg",
+    "cover_xl": "https://cdn-images.dzcdn.net/images/cover/f794dd1931dac42fc13f938850b686c6/1000x1000-000000-80-0-0.jpg"
+   }
+  },
+  {
+   "id": 4350411742,
+   "title": "Housewife",
+   "duration": 208,
+   "isrc": "USRC12601916",
+   "readable": false,
+   "artist": {
+    "name": "Tate McRae"
+   },
+   "album": {
+    "title": "Housewife",
+    "cover_big": "https://cdn-images.dzcdn.net/images/cover/0717657c0f9540946fb9813d3383a500/500x500-000000-80-0-0.jpg",
+    "cover_xl": "https://cdn-images.dzcdn.net/images/cover/0717657c0f9540946fb9813d3383a500/1000x1000-000000-80-0-0.jpg"
+   }
+  }
+ ]
+}
