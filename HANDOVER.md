@@ -110,6 +110,14 @@ flutter pub get && flutter analyze --no-fatal-infos && flutter test
 - **YouTube Music InnerTube** (mixes): `POST https://music.youtube.com/youtubei/v1/next?prettyPrint=false`, body `{context:{client:{clientName:"WEB_REMIX",clientVersion:"1.20241023.01.00",hl,gl}}, videoId, playlistId:"RDAMVM<id>", isAudioOnly:true, enablePersistentPlaylistPanel:true}`. Continuations are `{context, continuation:<nextRadioContinuationData.continuation>}`. Unauthenticated, no quota. If it breaks, bump `clientVersion` (B-017).
 - **YouTube Data API v3:** 1 quota unit per `list` call, with 10k units/day per Cloud project. Liked = `videos.list(part=snippet,contentDetails, myRating=like)`. Playlists = `playlists.list(mine=true)`. Items = `playlistItems.list`. Watch history isn't available, so use a Takeout import (B-019).
 - **Rate limits:** none observed. The app uses 1 request per action plus `RetryInterceptor` (2 retries, back-off on timeout/429/5xx). Search is debounced 350 ms. Mix refill fetches one page only when ≤ 3 tracks remain.
+- **Playlist import (B-044):**
+  - Spotify: `GET open.spotify.com/embed/{playlist|album}/<id>` → `<script id="__NEXT_DATA__">` → `props.pageProps.state.data.entity.trackList`. Artists are NBSP-separated; up to ~100 tracks.
+  - Deezer: `GET api.deezer.com/{playlist|album}/<id>`, then follow `tracks.next`. Error 800 means not found.
+  - Apple Music: page → `<script id="serialized-server-data">` → `data[0].data.sections[itemKind=trackLockup].items`. Art is a `{w}x{h}bb.{f}` template.
+  - JioSaavn: `webapi.get&token=<full token>`. Tokens may contain commas; B-002 was a truncated token.
+  - YouTube: youtube_explode playlist.
+  - Tidal: unsupported (needs registered developer credentials).
+  - Syncing is pull-based: at launch, on resume when older than 15 min, and via Sync now / Sync all. It mirrors the remote order.
 - **Streams:** no headers to just_audio. Cleartext is allowed for loopback only (cache proxy, B-006). Never persist YouTube URLs. Downloads re-resolve on every (re)start.
 - **Cache:** `<app cache>/audio_cache/<uid>.<mode>.audio`, LRU-pruned to 512 MB at launch. A complete file means 0 KB on replay.
 - **Downloads:** `<app documents>/downloads/<source>_<id>.{part,m4a|webm,jpg,json}` + Hive box `downloads`.

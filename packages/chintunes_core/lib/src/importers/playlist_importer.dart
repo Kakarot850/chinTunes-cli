@@ -284,7 +284,9 @@ class PlaylistImporter {
     if (data is! List) return const [];
     final out = <Track>[];
     for (final t in data.whereType<Map<dynamic, dynamic>>()) {
-      if (t['readable'] == false) continue; // region-blocked on Deezer itself
+      // NOTE: `readable: false` only means "not streamable on Deezer in the
+      // requester's country" (e.g. every track from India). We only need the
+      // metadata (audio comes from a YouTube / JioSaavn match), so keep it.
       final id = t['id']?.toString();
       final title = _clean(t['title']?.toString() ?? '');
       if (id == null || title.isEmpty) continue;
