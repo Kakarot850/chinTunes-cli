@@ -8,7 +8,7 @@ _Last updated: 2026-11-24 21:30 IST (session 2: accounts, mixes, data saver, dow
 
 ## 1. Current state & active phase
 
-- **Branch:** `feat/android-app` (pushed to `origin` = github.com/chinxcode/chinTunes-cli). `main` still holds only the CLI.
+- **Branch:** `feat/android-app`, committed **locally only**. `main` still holds only the CLI. Pushing to `origin` (github.com/chinxcode/chinTunes-cli) failed with 403 because the local GitHub login `Kakarot850` has read-only access (B-025). Once access is fixed, run `git push -u origin feat/android-app`. The push triggers CI.
 - **Active phase:** Phases 1–4 and 6 are implemented and **not yet verified**. The host has no Flutter SDK, so **CI is the first compiler**. Check the `build-apk` run for `feat/android-app` first.
 - **Implemented:** search (JioSaavn + YouTube), home feed + Your mixes, collections, share links, background playback with gapless prefetch, queue/shuffle/repeat/sleep timer, likes, play history + Takeout import, local playlists, Google Sign-In (guest mode default), YouTube liked/playlists, endless mixes, Data Saver modes + data-saved meter, stream cache, offline downloads.
 - **Not started:** synced lyrics UI, WorkManager background downloads, custom icon, release signing.
@@ -63,6 +63,7 @@ flutter pub get && flutter analyze --no-fatal-infos && flutter test
 ## 4. Unfinished tasks & exact next immediate step
 
 **Next immediate step:**
+0. Resolve B-025 (push access), then `git push -u origin feat/android-app`.
 1. Open the latest `build-apk` run on `feat/android-app`. This is the first compile of everything. Fix each `dart analyze`, `dart test`, `flutter analyze` and `flutter test` failure, log it in BUG_REPORT.md, push again, and repeat until green. Then flip `[~]`→`[x]` in PROGRESS.md.
 2. Install `app-arm64-v8a-release.apk` and verify:
    - a 320 kbps JioSaavn badge in High mode, and 96 kbps / Opus ~50 kbps in Ultra Saver
