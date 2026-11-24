@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Committed on purpose: `flutter create` would otherwise generate a v21 variant
+     using ?android:colorBackground (white flash on light-mode devices). -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/launch_background" />
+</layer-list>

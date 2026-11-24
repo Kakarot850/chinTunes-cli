@@ -1,0 +1,47 @@
+name: chintunes
+description: chinTunes — dark-first Android music streaming app (port of chinTunes-cli).
+publish_to: none
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.5.0
+  flutter: ">=3.27.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  chintunes_core:
+    path: ../packages/chintunes_core
+
+  # State & routing
+  flutter_riverpod: ^2.6.1
+  go_router: ^14.6.2
+
+  # Audio engine (background playback, lockscreen/notification, headset buttons)
+  just_audio: ^0.9.42
+  audio_service: ^0.18.15
+  audio_session: ^0.1.21
+
+  # Networking, storage, artwork
+  dio: ^5.7.0
+  hive_ce: ^2.4.0
+  hive_ce_flutter: ^2.0.0
+  cached_network_image: ^3.4.1
+  path_provider: ^2.1.5
+  connectivity_plus: ^6.0.5
+  file_picker: ^8.1.2
+
+  # Google Sign-In + YouTube Data API v3 (youtube.readonly)
+  # Pinned to the 6.x API (GoogleSignIn(scopes:), signIn(), authenticatedClient()).
+  google_sign_in: ^6.2.2
+  extension_google_sign_in_as_googleapis_auth: ^2.0.12
+  googleapis: ^13.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
