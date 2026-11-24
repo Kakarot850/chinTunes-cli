@@ -171,6 +171,64 @@ final historyEntriesProvider = StreamProvider<List<HistoryEntry>>((ref) {
   return ref.watch(libraryStoreProvider).watchCombinedHistory(musicOnly: musicOnly);
 });
 
+// ------------------------------------------------------ home radio feed
+
+/// Home "Quick picks" + endless "More for you" (B-042): a YouTube Music radio
+/// seeded from the most-played track, else the latest like, else trending.
+/// [HomeRadioNotifier.loadMore] appends the next page as the user scrolls.
+class HomeRadioNotifier extends AsyncNotifier<List<Track>> {
+  MixSession? _session;
+  bool _loadingMore = false;
+  bool _exhausted = false;
+
+  bool get isLoadingMore => _loadingMore;
+  bool get exhausted => _exhausted;
+
+  @override
+  Future<List<Track>> build() async {
+    _session = null;
+    _exhausted = false;
+    final store = ref.read(libraryStoreProvider);
+    Track? seed;
+    final top = store.topTracks(limit: 1);
+    if (top.isNotEmpty) seed = top.first;
+    if (seed == null) {
+      final liked = store.likedTracks();
+      if (liked.isNotEmpty) seed = liked.first;
+    }
+    if (seed == null) {
+      final feed = await ref.watch(homeFeedProvider.future);
+      if (feed.trending.isNotEmpty) seed = feed.trending.first;
+    }
+    if (seed == null) return const [];
+    final session = await ref.read(coreServicesProvider).mixes.start(seed);
+    _session = session;
+    return session.initialTracks;
+  }
+
+  Future<void> loadMore() async {
+    final session = _session;
+    final current = state.valueOrNull;
+    if (session == null || current == null || _loadingMore || _exhausted) return;
+    _loadingMore = true;
+    try {
+      final more = await session.more();
+      if (!identical(session, _session)) return;
+      if (more.isEmpty) {
+        _exhausted = true;
+      } else {
+        state = AsyncData([...current, ...more]);
+      }
+    } catch (_) {
+      // Offline / InnerTube hiccup: the next scroll retries.
+    } finally {
+      _loadingMore = false;
+    }
+  }
+}
+
+final homeRadioProvider = AsyncNotifierProvider<HomeRadioNotifier, List<Track>>(HomeRadioNotifier.new);
+
 // ------------------------------------------------------------ mixes
 
 /// Seeds for the "Your Mixes" shelf: most played, then recent likes,

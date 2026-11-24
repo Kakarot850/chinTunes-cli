@@ -241,6 +241,45 @@ class AccountPlaylistScreen extends ConsumerWidget {
   }
 }
 
+/// App-bar account button (Home): avatar when signed in, otherwise a
+/// one-tap "Sign in with Google" (B-043).
+class AccountButton extends ConsumerWidget {
+  const AccountButton({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final account = ref.watch(accountProvider);
+    final user = account.user;
+    if (user != null) {
+      return IconButton(
+        tooltip: 'Your YouTube library',
+        onPressed: () => context.go('/library/youtube'),
+        icon: CircleAvatar(
+          radius: 14,
+          backgroundColor: AppColors.elevated,
+          backgroundImage: user.photoUrl == null ? null : NetworkImage(user.photoUrl!),
+          child: user.photoUrl == null ? Text(user.email.substring(0, 1).toUpperCase()) : null,
+        ),
+      );
+    }
+    return IconButton(
+      tooltip: 'Sign in with Google',
+      icon: account.busy
+          ? const SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2))
+          : const Icon(Icons.account_circle_outlined),
+      onPressed: account.busy
+          ? null
+          : () async {
+              final messenger = ScaffoldMessenger.of(context);
+              final notifier = ref.read(accountProvider.notifier);
+              await notifier.signIn();
+              final error = ref.read(accountProvider).error;
+              if (error != null) messenger.showSnackBar(SnackBar(content: Text(error)));
+            },
+    );
+  }
+}
+
 /// Small account row for Settings.
 class AccountTile extends ConsumerWidget {
   const AccountTile({super.key});

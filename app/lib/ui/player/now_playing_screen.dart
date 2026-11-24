@@ -47,9 +47,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
   void _setQueue({required bool open}) {
     if (!_queue.isAttached) return;
     // Same peek fraction QueuePanel uses (sheet bounds must not be exceeded).
-    final peek = ((kQueuePeekHeight + MediaQuery.paddingOf(context).bottom) / MediaQuery.sizeOf(context).height)
-        .clamp(0.05, 0.4)
-        .toDouble();
+    final peek = queuePeekFraction(context, MediaQuery.sizeOf(context).height);
     unawaited(_queue.animateTo(
       open ? kQueueMaxSize : peek,
       duration: const Duration(milliseconds: 280),

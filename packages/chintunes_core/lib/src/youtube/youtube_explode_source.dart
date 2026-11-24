@@ -38,7 +38,13 @@ class YoutubeExplodeSource implements YouTubeSource {
   @override
   Future<List<Track>> search(String query, {int limit = 10}) async {
     final results = await _yt.search.search(query);
-    return results.take(limit).map(_toTrack).toList();
+    // Live streams have no duration and are UNPLAYABLE for the visionOS
+    // client ("This live stream recording is not available"), so skip them.
+    return results
+        .where((v) => v.duration != null && v.duration! > Duration.zero)
+        .take(limit)
+        .map(_toTrack)
+        .toList();
   }
 
   @override

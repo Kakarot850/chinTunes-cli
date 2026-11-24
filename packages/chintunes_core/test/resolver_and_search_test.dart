@@ -20,7 +20,7 @@ void main() {
 
     setUp(() {
       yt = FakeYouTubeSource(searchResults: const [
-        Track(id: 'dQw4w9WgXcQ', source: TrackSource.youtube, title: 'Match'),
+        Track(id: 'dQw4w9WgXcQ', source: TrackSource.youtube, title: 'Match', durationSec: 213),
       ]);
       adapter = FixtureAdapter(calls: {'song.getDetails': 'song_details.json'});
       resolver = StreamResolver(

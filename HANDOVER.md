@@ -124,7 +124,16 @@ The app works fully in **guest mode** without any of this. Sign-in only unlocks 
 3. **OAuth consent screen** → User type **External** → app name, support email.
    - **Scopes:** add `https://www.googleapis.com/auth/youtube.readonly`.
    - **Test users:** add every Google account that will sign in. While the app is in *Testing*, only test users can sign in, and tokens expire after 7 days. That is fine for personal use, and verification is only needed for public release.
-4. **Create a stable signing key** (JDK `keytool` is already on this host):
+4. **Stable signing key: already generated (session 6).**
+   - Keystore: `%USERPROFILE%\.chintunes\chintunes-debug.keystore` (alias `androiddebugkey`, passwords `android`, **outside git**).
+   - **SHA-1:** `91:DA:A7:28:F5:B1:CE:38:B8:CB:81:79:46:01:24:E2:72:3C:70:DD`
+   - SHA-256: `E2:60:D6:C3:47:B8:2E:E6:05:E3:1A:63:67:AC:0A:90:7D:63:80:DB:C3:00:8C:E8:71:C9:C0:DE:4F:9D:32:17`
+   - **Still to do by the owner** (the agent was not permitted to write repo secrets):
+     ```powershell
+     [Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:USERPROFILE\.chintunes\chintunes-debug.keystore")) | gh secret set ANDROID_DEBUG_KEYSTORE_BASE64 -R Kakarot850/chinTunes-cli
+     ```
+     Then rerun CI. The "Print signing certificate fingerprints" step must show `SHA-1 digest: 91daa728f5b1ce38b8cb8179460124e2723c70dd`.
+   - The original instructions for creating a key from scratch, kept for reference:
    ```powershell
    keytool -genkeypair -v -keystore chintunes-debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
    keytool -list -v -keystore chintunes-debug.keystore -alias androiddebugkey -storepass android   # copy the SHA1 line

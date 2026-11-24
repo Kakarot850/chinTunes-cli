@@ -41,34 +41,35 @@ class _AppShellState extends ConsumerState<AppShell> {
     super.dispose();
   }
 
-  bool _confirming = false;
+  static const Duration _exitWindow = Duration(seconds: 2);
+  DateTime? _lastBack;
 
-  /// System back at the root of a tab: other tabs → Home; Home → confirm exit.
-  /// (Back inside a tab's stack or on /player is handled by go_router first.)
-  Future<void> _onRootBack() async {
+  /// System back at the root of a tab: other tabs → Home. On Home, the first
+  /// back shows a hint and a second back within 2 s closes the app. Playback
+  /// is NOT stopped: the audio_service foreground service keeps playing and
+  /// the notification brings the app back (B-034 revised).
+  void _onRootBack() {
     final shell = widget.navigationShell;
     if (shell.currentIndex != 0) {
       shell.goBranch(0);
       return;
     }
-    if (_confirming) return;
-    _confirming = true;
+    final now = DateTime.now();
+    final last = _lastBack;
+    if (last != null && now.difference(last) < _exitWindow) {
+      _lastBack = null;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      unawaited(SystemNavigator.pop());
+      return;
+    }
+    _lastBack = now;
     final playing = ref.read(isPlayingProvider);
-    final exit = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Exit chinTunes?'),
-        content: Text(playing ? 'Playback will stop.' : 'You can come back any time.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: const Text('Exit')),
-        ],
-      ),
-    );
-    _confirming = false;
-    if (exit != true) return;
-    await ref.read(audioHandlerProvider).stop();
-    await SystemNavigator.pop();
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        duration: _exitWindow,
+        content: Text(playing ? 'Press back again to exit. Music keeps playing.' : 'Press back again to exit.'),
+      ));
   }
 
   @override
@@ -77,7 +78,7 @@ class _AppShellState extends ConsumerState<AppShell> {
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) unawaited(_onRootBack());
+        if (!didPop) _onRootBack();
       },
       child: Scaffold(
       extendBody: true,

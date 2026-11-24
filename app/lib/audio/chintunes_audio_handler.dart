@@ -189,6 +189,20 @@ class ChinTunesAudioHandler extends BaseAudioHandler with SeekHandler {
     }
   }
 
+  /// Queue panel → "Clear upcoming": keeps only the playing track (also stops
+  /// a running mix/autoplay refill). Playback is not interrupted.
+  Future<void> clearUpcoming() async {
+    final current = _queue.current;
+    if (current == null) return;
+    _mix = null;
+    _mixIsAutoplay = false;
+    _queueGeneration++;
+    _queue.setTracks([current]);
+    _publishQueue();
+    _broadcastState();
+    await _syncPrefetch();
+  }
+
   Future<void> moveQueueItem(int from, int to) async {
     _queue.move(from, to);
     _publishQueue();

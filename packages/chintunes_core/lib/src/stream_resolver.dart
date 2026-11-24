@@ -90,13 +90,50 @@ class StreamResolver {
     }
   }
 
-  /// `"<title> <artist> audio"` → first YouTube result (CLI `ytsearch1:`).
-  Future<ResolvedStream> _viaYouTube(Track track, DataMode mode) async {
-    final matches = await _youtube.search('${track.title} ${track.artist} audio', limit: 1);
-    if (matches.isEmpty) {
+  /// `"<title> <artist> audio"` → best playable YouTube result (B-040).
+  ///
+  /// The CLI took the first result (`ytsearch1:`). On mobile that sometimes
+  /// lands on a live stream, a Short or a long compilation that cannot be
+  /// played, so up to [maxAttempts] ranked candidates are tried in order.
+  Future<ResolvedStream> _viaYouTube(Track track, DataMode mode, {int maxAttempts = 3}) async {
+    final results = await _youtube.search('${track.title} ${track.artist} audio', limit: 8);
+    final ranked = rankYouTubeMatches(results, track);
+    if (ranked.isEmpty) {
       throw StreamResolveException('No YouTube match for "${track.title}"');
     }
-    return _youtube.resolveAudio(matches.first.id, mode: mode);
+    Object? lastError;
+    for (final candidate in ranked.take(maxAttempts)) {
+      try {
+        return await _youtube.resolveAudio(candidate.id, mode: mode);
+      } catch (e) {
+        lastError = e;
+      }
+    }
+    if (lastError is StreamResolveException) throw lastError;
+    throw StreamResolveException('No playable YouTube match for "${track.title}"');
+  }
+
+  /// Orders YouTube search results for playing [wanted]:
+  /// drops live streams (no duration) and Shorts (< 45 s); with a known
+  /// target duration, prefers the closest length (search order breaks ties)
+  /// and drops results more than 3 minutes off.
+  static List<Track> rankYouTubeMatches(List<Track> results, Track wanted) {
+    final playable = <({Track track, int order})>[];
+    for (var i = 0; i < results.length; i++) {
+      final d = results[i].durationSec;
+      if (d == null || d < 45) continue;
+      playable.add((track: results[i], order: i));
+    }
+    final target = wanted.durationSec;
+    if (target == null || target <= 0) return [for (final p in playable) p.track];
+    final close = playable.where((p) => (p.track.durationSec! - target).abs() <= 180).toList()
+      ..sort((a, b) {
+        // 10 s buckets count as equally good: keep YouTube's relevance order.
+        final ba = (a.track.durationSec! - target).abs() ~/ 10;
+        final bb = (b.track.durationSec! - target).abs() ~/ 10;
+        return ba != bb ? ba.compareTo(bb) : a.order.compareTo(b.order);
+      });
+    return [for (final p in close) p.track];
   }
 
   static String _norm(String s) => s.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '');

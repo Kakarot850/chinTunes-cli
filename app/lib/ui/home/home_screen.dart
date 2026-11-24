@@ -8,11 +8,14 @@ import 'package:go_router/go_router.dart';
 import '../../audio/playback_actions.dart';
 import '../../core/router/app_router.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/format.dart';
 import '../../data/providers.dart';
 import '../widgets/artwork.dart';
 import '../widgets/collection_card.dart';
 import '../widgets/state_views.dart';
+import '../widgets/track_actions.dart';
 import '../widgets/track_tile.dart';
+import '../youtube/youtube_library_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -22,6 +25,9 @@ class HomeScreen extends ConsumerWidget {
     final feed = ref.watch(homeFeedProvider);
     final history = ref.watch(historyProvider).valueOrNull ?? const <Track>[];
     final mixSeeds = ref.watch(mixSeedsProvider);
+    final radio = ref.watch(homeRadioProvider);
+    final radioTracks = radio.valueOrNull ?? const <Track>[];
+    final moreForYou = radioTracks.length > 16 ? radioTracks.sublist(16) : const <Track>[];
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     final List<Widget> feedSlivers = feed.when(
@@ -79,13 +85,17 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       body: RefreshIndicator(
-        onRefresh: () => ref.refresh(homeFeedProvider.future),
+        onRefresh: () async {
+          ref.invalidate(homeRadioProvider);
+          await ref.refresh(homeFeedProvider.future);
+        },
         child: CustomScrollView(
           slivers: [
             SliverAppBar(
               floating: true,
               title: Text('chinTunes', style: Theme.of(context).textTheme.titleLarge),
               actions: [
+                const AccountButton(),
                 IconButton(
                   tooltip: 'Settings',
                   icon: const Icon(Icons.settings_outlined),
@@ -100,6 +110,17 @@ class HomeScreen extends ConsumerWidget {
                   onTap: () => ref.playQueue(history),
                 ),
               ),
+            if (radioTracks.isNotEmpty) ...[
+              SectionHeader(
+                'Quick picks',
+                trailing: TextButton(
+                  onPressed: () => ref.playQueue(radioTracks),
+                  child: const Text('Play all'),
+                ),
+              ).toSliver(),
+              SliverToBoxAdapter(child: _QuickPicks(tracks: radioTracks.take(16).toList(), all: radioTracks)),
+            ] else if (radio.isLoading)
+              const SliverToBoxAdapter(child: ShelfSkeleton()),
             if (mixSeeds.isNotEmpty) ...[
               const SliverToBoxAdapter(child: SectionHeader('Your mixes')),
               SliverToBoxAdapter(
@@ -127,7 +148,201 @@ class HomeScreen extends ConsumerWidget {
               ),
             ],
             ...feedSlivers,
+            // Endless vertical feed (YouTube-style), loads more near the end.
+            if (moreForYou.isNotEmpty) ...[
+              const SliverToBoxAdapter(child: SectionHeader('More for you')),
+              SliverList.builder(
+                itemCount: moreForYou.length + 1,
+                itemBuilder: (context, i) {
+                  if (i >= moreForYou.length - 4) unawaited(ref.read(homeRadioProvider.notifier).loadMore());
+                  if (i == moreForYou.length) {
+                    final notifier = ref.read(homeRadioProvider.notifier);
+                    return notifier.exhausted
+                        ? const SizedBox(height: 8)
+                        : const Padding(padding: EdgeInsets.all(16), child: LoadingView());
+                  }
+                  return _FeedCard(
+                    track: moreForYou[i],
+                    onTap: () => ref.playQueue(radioTracks, index: 16 + i),
+                  );
+                },
+              ),
+            ],
             SliverToBoxAdapter(child: SizedBox(height: bottomInset + 24)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+extension on Widget {
+  Widget toSliver() => SliverToBoxAdapter(child: this);
+}
+
+/// YouTube Music-style "Quick picks": songs stacked 4 per column, swiped
+/// horizontally page by page (the next page peeks in).
+class _QuickPicks extends ConsumerStatefulWidget {
+  const _QuickPicks({required this.tracks, required this.all});
+
+  final List<Track> tracks;
+  final List<Track> all;
+
+  static const int rows = 4;
+  static const double rowHeight = 60;
+
+  @override
+  ConsumerState<_QuickPicks> createState() => _QuickPicksState();
+}
+
+class _QuickPicksState extends ConsumerState<_QuickPicks> {
+  // Kept across rebuilds so the current page doesn't reset.
+  final PageController _pages = PageController(viewportFraction: 0.9);
+
+  @override
+  void dispose() {
+    _pages.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const rows = _QuickPicks.rows;
+    const rowHeight = _QuickPicks.rowHeight;
+    final tracks = widget.tracks;
+    final all = widget.all;
+    final pages = (tracks.length / rows).ceil();
+    final theme = Theme.of(context);
+    return SizedBox(
+      height: rows * rowHeight,
+      child: PageView.builder(
+        controller: _pages,
+        padEnds: false,
+        itemCount: pages,
+        itemBuilder: (context, page) => Column(
+          children: [
+            for (var r = 0; r < rows; r++)
+              if (page * rows + r < tracks.length)
+                Builder(builder: (context) {
+                  final index = page * rows + r;
+                  final t = tracks[index];
+                  return SizedBox(
+                    height: rowHeight,
+                    child: InkWell(
+                      onTap: () => ref.playQueue(all, index: index),
+                      onLongPress: () => unawaited(showTrackActions(context, t)),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 16),
+                        child: Row(
+                          children: [
+                            Artwork(url: t.imageUrl, size: 48, radius: 6),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    t.title,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: AppColors.textPrimary,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  Text(t.artist, maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodySmall),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              tooltip: 'More options',
+                              icon: const Icon(Icons.more_vert_rounded, size: 20),
+                              onPressed: () => unawaited(showTrackActions(context, t)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Large card for the vertical "More for you" feed (YouTube home style).
+class _FeedCard extends StatelessWidget {
+  const _FeedCard({required this.track, required this.onTap});
+
+  final Track track;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final duration = track.duration;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: () => unawaited(showTrackActions(context, track)),
+        borderRadius: BorderRadius.circular(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Artwork(url: track.imageUrl, radius: 12),
+                  if (duration != null)
+                    Positioned(
+                      right: 8,
+                      bottom: 8,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.75),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          child: Text(formatDuration(duration), style: const TextStyle(fontSize: 12)),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        track.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall?.copyWith(color: AppColors.textPrimary),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(track.artist, maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodySmall),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'More options',
+                  icon: const Icon(Icons.more_vert_rounded),
+                  onPressed: () => unawaited(showTrackActions(context, track)),
+                ),
+              ],
+            ),
           ],
         ),
       ),
