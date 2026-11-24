@@ -10,15 +10,17 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
-downloads/
-eggs/
+# Anchored to the repo root: un-anchored `lib/` / `downloads/` / `parts/`
+# would silently ignore Dart `lib/` folders in app/ and packages/ (B-004).
+/dist/
+/downloads/
+/eggs/
 .eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
+/lib/
+/lib64/
+/parts/
+/sdist/
+/var/
 wheels/
 share/python-wheels/
 *.egg-info/
@@ -45,3 +47,7 @@ MySyncedPlaylist/
 
 # macOS metadata
 .DS_Store
+
+# Dart / Flutter (see also app/.gitignore)
+.dart_tool/
+packages/chintunes_core/pubspec.lock
