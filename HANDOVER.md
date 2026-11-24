@@ -73,7 +73,7 @@ flutter pub get && flutter analyze --no-fatal-infos && flutter test
 ## 4. Unfinished tasks & exact next immediate step
 
 **Next immediate step:**
-1. Confirm the latest `build-apk` run is still green and that its "Print signing certificate fingerprints" step prints a `SHA-1 digest` line (switched to `apksigner` after run 45426934986).
+1. The fingerprint step works (run 45428816001 printed `V2 Signer: certificate SHA-1 digest: b3a11da9…9c68`). That SHA-1 belongs to the runner's **throwaway** debug key and changes every run, so don't register it with Google. Create the stable keystore secret first (§7, B-018), then register the SHA-1 printed by the next run.
 2. Install `app-arm64-v8a-release.apk` and verify:
    - a 320 kbps JioSaavn badge in High mode, and 96 kbps / Opus ~50 kbps in Ultra Saver
    - Start mix refills the queue endlessly
