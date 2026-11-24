@@ -111,6 +111,12 @@ jobs:
       - name: Test
         run: flutter test
 
+      # Runners have 16 GB; keep the committed -Xmx1536m for low-RAM hosts (B-031).
+      - name: Raise Gradle heap for CI
+        run: |
+          sed -i 's/-Xmx1536m/-Xmx4g/' android/gradle.properties
+          cat android/gradle.properties
+
       - name: Build release APKs (split per ABI)
         run: flutter build apk --release --split-per-abi
 
