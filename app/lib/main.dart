@@ -19,7 +19,7 @@ import 'data/providers.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.light,

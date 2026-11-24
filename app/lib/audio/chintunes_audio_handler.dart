@@ -340,6 +340,8 @@ class ChinTunesAudioHandler extends BaseAudioHandler with SeekHandler {
     final cacheFile = _cache?.fileFor(original, _resolver.dataMode);
     final AudioSource source = cacheFile == null
         ? AudioSource.uri(stream.uri, tag: tag)
+        // Experimental in just_audio, but it is the only built-in byte cache.
+        // ignore: experimental_member_use
         : LockCachingAudioSource(stream.uri, cacheFile: cacheFile, tag: tag);
     return _Prepared(source: source, badge: stream.badge, fromLocal: false, kbps: stream.bitrateKbps);
   }

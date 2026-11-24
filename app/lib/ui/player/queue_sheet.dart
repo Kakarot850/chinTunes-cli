@@ -62,10 +62,8 @@ class QueueSheet extends ConsumerWidget {
             child: ReorderableListView.builder(
               buildDefaultDragHandles: false,
               itemCount: items.length,
-              onReorder: (oldIndex, newIndex) {
-                final target = newIndex > oldIndex ? newIndex - 1 : newIndex;
-                unawaited(handler.moveQueueItem(oldIndex, target));
-              },
+              // onReorderItem (Flutter ≥ 3.41) already adjusts newIndex for the removed item.
+              onReorderItem: (oldIndex, newIndex) => unawaited(handler.moveQueueItem(oldIndex, newIndex)),
               itemBuilder: (context, i) {
                 final item = items[i];
                 final isCurrent = i == current;
