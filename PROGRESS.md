@@ -2,7 +2,7 @@
 
 Port of **chinTunes-cli** (Python, this repo's root) into a dark-first Flutter Android streaming app.
 
-Legend: `[x]` done **and verified** · `[~]` implemented, awaiting a green CI run (`dart test`, `flutter analyze`, `flutter test`, APK build) · `[ ]` not started
+Legend: `[x]` done **and verified in CI** (analyze + tests + APK build; on-device QA is tracked as separate items) · `[~]` implemented, awaiting CI · `[ ]` not started
 
 > Per the operating rules, nothing that is code is marked `[x]` until CI (or a local Flutter SDK) has run `analyze` + `test` green. See HANDOVER.md → "Verification".
 
@@ -15,55 +15,55 @@ Legend: `[x]` done **and verified** · `[~]` implemented, awaiting a green CI ru
 - [x] Reverse the media-URL crypto (DES-ECB `38346591`); `_96`/`_160`/`_320` renditions verified
 - [x] Map Spotify, YouTube (yt-dlp → `youtube_explode_dart`), LRCLIB, iTunes
 - [x] Capture trimmed live fixtures → `packages/chintunes_core/test/fixtures/*.json`
-- [~] `packages/chintunes_core` pure-Dart package: JioSaavn client/crypto/parser, Spotify, YouTube source, LRCLIB + LRC parser + lyrics cascade, `StreamResolver`, `SearchService`, `CatalogService`, `LinkRouter`, `PlaybackQueue`
-- [~] Fixture-backed unit tests (mock Dio adapter, fake YouTube, MockClient for googleapis; fully offline)
+- [x] `packages/chintunes_core` pure-Dart package: JioSaavn client/crypto/parser, Spotify, YouTube source, LRCLIB + LRC parser + lyrics cascade, `StreamResolver`, `SearchService`, `CatalogService`, `LinkRouter`, `PlaybackQueue`
+- [x] Fixture-backed unit tests (mock Dio adapter, fake YouTube, MockClient for googleapis; fully offline)
 
 ## Phase 2: App Architecture & Background Audio Engine
 
-- [~] Flutter scaffold in `app/` (manifest, `MainActivity : AudioServiceActivity`, dark launch theme, `-Xmx1536m`)
-- [~] Riverpod providers, go_router shell (Home / Search / Library) + root `/player` and `/settings`
-- [~] `ChinTunesAudioHandler`: lazy resolution, gapless 2-item prefetch window, shuffle/repeat, queue edits, auto-skip on failure, becoming-noisy pause, notification/lockscreen/headset controls
-- [~] Hive `LibraryStore`: liked, history (+ play counts), playlists, searches, settings, imported history, download registry
-- [~] Data Mode setting wired to resolver + handler (Settings screen)
+- [x] Flutter scaffold in `app/` (manifest, `MainActivity : AudioServiceActivity`, dark launch theme, `-Xmx1536m`)
+- [x] Riverpod providers, go_router shell (Home / Search / Library) + root `/player` and `/settings`
+- [x] `ChinTunesAudioHandler`: lazy resolution, gapless 2-item prefetch window, shuffle/repeat, queue edits, auto-skip on failure, becoming-noisy pause, notification/lockscreen/headset controls
+- [x] Hive `LibraryStore`: liked, history (+ play counts), playlists, searches, settings, imported history, download registry
+- [x] Data Mode setting wired to resolver + handler (Settings screen)
 - [ ] Device verification: background playback, notification controls, BT buttons, Android 13+ notification prompt
 
 ## Phase 3: Dark Modern UI & Player Screens
 
-- [~] Theme (`#09090B` / `#121216` / `#1C1C22`, `0x14FFFFFF` hairlines, accent `#8B7CFF`, status green `#34D399`)
-- [~] Home: quick-resume, **Your mixes**, recently played, trending, launch shelves, Settings entry
-- [~] Search: debounce, filter chips, JioSaavn + YouTube, recent searches, paste-a-link
-- [~] Collection pages (artist pages get **Start mix**)
-- [~] Glass mini-player + Now Playing (art tint, isolated seek bar, shuffle/repeat, source badge, sleep timer, queue sheet with mix label, **Start mix**, **Download**)
-- [~] Library: Liked, Downloads, YouTube & History, local playlists
+- [x] Theme (`#09090B` / `#121216` / `#1C1C22`, `0x14FFFFFF` hairlines, accent `#8B7CFF`, status green `#34D399`)
+- [x] Home: quick-resume, **Your mixes**, recently played, trending, launch shelves, Settings entry
+- [x] Search: debounce, filter chips, JioSaavn + YouTube, recent searches, paste-a-link
+- [x] Collection pages (artist pages get **Start mix**)
+- [x] Glass mini-player + Now Playing (art tint, isolated seek bar, shuffle/repeat, source badge, sleep timer, queue sheet with mix label, **Start mix**, **Download**)
+- [x] Library: Liked, Downloads, YouTube & History, local playlists
 - [ ] Synced karaoke lyrics view (core `LyricsService` + `Lyrics.activeIndex` ready)
 - [ ] Custom launcher icon
 
 ## Phase 4: Offline Cache, Local Playlists & Polish
 
-- [~] Local playlists
-- [~] **Download Manager** (core `DownloadManager`): `<documents>/downloads/` audio + cover + JSON sidecar, Hive registry, progress stream, pause / resume (HTTP Range) / cancel / delete, re-queue of interrupted downloads at launch, storage usage
-- [~] Downloaded tracks: green badge, offline-first resolver (zero network), local cover art, Library → Downloads
-- [~] **Stream cache**: `LockCachingAudioSource` per track × data mode; complete cache = file playback (0 KB on replay/scrub); LRU prune to 512 MB at startup; "Clear cache" in Settings
+- [x] Local playlists
+- [x] **Download Manager** (core `DownloadManager`): `<documents>/downloads/` audio + cover + JSON sidecar, Hive registry, progress stream, pause / resume (HTTP Range) / cancel / delete, re-queue of interrupted downloads at launch, storage usage
+- [x] Downloaded tracks: green badge, offline-first resolver (zero network), local cover art, Library → Downloads
+- [x] **Stream cache**: `LockCachingAudioSource` per track × data mode; complete cache = file playback (0 KB on replay/scrub); LRU prune to 512 MB at startup; "Clear cache" in Settings
 - [ ] True background downloads via WorkManager (currently in-process; resume on next launch, B-021)
 - [ ] Port `syncedlyrics` cascade (Musixmatch / NetEase) if LRCLIB coverage is insufficient
 - [ ] Error/empty-state audit, haptics, reduced-motion pass
 
 ## Phase 5: GitHub Actions APK Build & Final QA
 
-- [~] `.github/workflows/build-apk.yml`: core analyze + test → app `flutter create` fill → analyze → test → split-ABI release APKs → artifact; runs on `main` and `feat/**`; optional stable keystore secret; prints APK SHA-1
-- [ ] First green CI run
+- [x] `.github/workflows/build-apk.yml`: core analyze + test → app `flutter create` fill → analyze → test → split-ABI release APKs → artifact; runs on `main` and `feat/**`; optional stable keystore secret; prints APK SHA-1
+- [x] First green CI run: #45426934986 (core analyze clean + 90 tests, app analyze 0 errors/warnings + 16 tests, 3 split-ABI release APKs 20–23 MB)
 - [ ] Stable signing key secret (`ANDROID_DEBUG_KEYSTORE_BASE64`) for a fixed SHA-1 (needed for Google Sign-In)
 - [ ] Release signing for distribution
 - [ ] Device QA matrix (Android 10 / 13 / 14+), memory profile on a low-RAM device
 
 ## Phase 6: Accounts, Mixes & Data Saver (upgrade 1)
 
-- [~] **Google Sign-In** (`google_sign_in` 6.x, `youtube.readonly`) with guest mode and a "not configured" state (DEVELOPER_ERROR 10 / 12500 handled)
-- [~] **YouTube library** via Data API v3: liked music/videos (`videos.list myRating=like`, music-tagged by category 10 / Topic / VEVO, title cleaning), playlists (`playlists.list mine=true`), private playlist items (`playlistItems.list`)
-- [~] **History tab**: local plays + **Google Takeout `watch-history.json` import** (background isolate, idempotent, ads/removed videos skipped), music-only filter
-- [~] **Mix / endless radio engine**: InnerTube `next` (`WEB_REMIX`) with `RDAMVM<id>` → `RD<id>` fallback, continuation paging, cross-page de-dupe, re-seed when exhausted; handler refills when ≤ 3 tracks remain
-- [~] **Data Saver**: Ultra Saver (Opus 249 ~50 kbps / JioSaavn 96) · Balanced (Opus 250 ~70 kbps / 160) · High (Opus 251 ~160 kbps / 320 → 160 fallback); audio-only streams only; Ultra artwork thumbnails (`150x150`, `mqdefault`, `=w120`); no prefetch on cellular in Ultra; session + total data saved / streamed in Settings
-- [~] Tests: stream-quality selection, artwork sizing, network policy, data meter, RD mix parsing (live-captured fixtures), mix session de-dupe/continuation, download persistence/resume/pause/delete, YouTube Data API mapping (MockClient), Takeout parsing, store play counts / import / download registry
+- [x] **Google Sign-In** (`google_sign_in` 6.x, `youtube.readonly`) with guest mode and a "not configured" state (DEVELOPER_ERROR 10 / 12500 handled)
+- [x] **YouTube library** via Data API v3: liked music/videos (`videos.list myRating=like`, music-tagged by category 10 / Topic / VEVO, title cleaning), playlists (`playlists.list mine=true`), private playlist items (`playlistItems.list`)
+- [x] **History tab**: local plays + **Google Takeout `watch-history.json` import** (background isolate, idempotent, ads/removed videos skipped), music-only filter
+- [x] **Mix / endless radio engine**: InnerTube `next` (`WEB_REMIX`) with `RDAMVM<id>` → `RD<id>` fallback, continuation paging, cross-page de-dupe, re-seed when exhausted; handler refills when ≤ 3 tracks remain
+- [x] **Data Saver**: Ultra Saver (Opus 249 ~50 kbps / JioSaavn 96) · Balanced (Opus 250 ~70 kbps / 160) · High (Opus 251 ~160 kbps / 320 → 160 fallback); audio-only streams only; Ultra artwork thumbnails (`150x150`, `mqdefault`, `=w120`); no prefetch on cellular in Ultra; session + total data saved / streamed in Settings
+- [x] Tests: stream-quality selection, artwork sizing, network policy, data meter, RD mix parsing (live-captured fixtures), mix session de-dupe/continuation, download persistence/resume/pause/delete, YouTube Data API mapping (MockClient), Takeout parsing, store play counts / import / download registry
 - [ ] Verify Google Sign-In on device once the OAuth client + stable SHA-1 exist (HANDOVER.md §7)
 
 ---
@@ -91,4 +91,5 @@ Legend: `[x]` done **and verified** · `[~]` implemented, awaiting a green CI ru
 ## Changelog
 
 - **2026-11-24 19:55 IST**: Session 1. CLI reverse-engineering + live probes; `packages/chintunes_core`; Flutter app scaffold (theme, router, audio handler, Hive store, Home/Search/Library/Collection/Now Playing/queue/sleep timer); CI workflow; governance docs; anchored root `.gitignore` (B-004).
-- **2026-11-24 21:30 IST**: Session 2 (upgrade 1). Core: `DataMode`/`StreamSelector`/`ArtworkSizer`/`NetworkPolicy`/`DataUsageMeter`; YouTube itag selection (249/250/251, AAC fallback); InnerTube client + parser + `MixEngine`/`MixSession` (fixtures captured live); `DownloadManager` (+ JSON/memory stores, Dio range fetcher); `YouTubeAccountClient` + `YouTubeLibraryMapper` + `TakeoutHistoryParser`; resolver offline lookup + per-call mode. App: Google account notifier (guest mode), YouTube & History screen (Liked / Playlists / History + Takeout import), Downloads screen, Settings (data mode, data saved, storage, cache, account), Your mixes shelf, Start mix everywhere, download badges/actions, `LockCachingAudioSource` cache + LRU prune, connectivity-aware prefetch, data accounting in the handler, network security config. CI: `feat/**` trigger, optional stable keystore secret, SHA-1 print. Branch `feat/android-app` committed locally (4 commits). **Push blocked:** GitHub user `Kakarot850` has read-only access to `chinxcode/chinTunes-cli` (HTTP 403, B-025), so CI has not run yet.
+- **2026-11-24 20:30 IST**: Session 2 (upgrade 1). Core: `DataMode`/`StreamSelector`/`ArtworkSizer`/`NetworkPolicy`/`DataUsageMeter`; YouTube itag selection (249/250/251, AAC fallback); InnerTube client + parser + `MixEngine`/`MixSession` (fixtures captured live); `DownloadManager` (+ JSON/memory stores, Dio range fetcher); `YouTubeAccountClient` + `YouTubeLibraryMapper` + `TakeoutHistoryParser`; resolver offline lookup + per-call mode. App: Google account notifier (guest mode), YouTube & History screen (Liked / Playlists / History + Takeout import), Downloads screen, Settings (data mode, data saved, storage, cache, account), Your mixes shelf, Start mix everywhere, download badges/actions, `LockCachingAudioSource` cache + LRU prune, connectivity-aware prefetch, data accounting in the handler, network security config. CI: `feat/**` trigger, optional stable keystore secret, SHA-1 print. Branch `feat/android-app` committed locally (4 commits). **Push blocked:** GitHub user `Kakarot850` has read-only access to `chinxcode/chinTunes-cli` (HTTP 403, B-025), so CI has not run yet.
+- **2026-11-24 21:13 IST**: Session 3 (CI bring-up). Forked to `Kakarot850/chinTunes-cli` (origin; `upstream` = chinxcode), pushed `feat/android-app`. Five runs to green: B-026 (setup-java gradle cache), B-027 (analyzer warning: experimental `LockCachingAudioSource`; `onReorderItem`), B-029 (plugin compileSdk 34 vs required 36), B-030 (lint needs JDK 21). **Run #45426934986 green**: core 90/90 tests, analyze clean; app analyze 0 errors/0 warnings (30 infos, B-028), 16/16 tests; APKs: arm64-v8a 22.0 MB, armeabi-v7a 20.0 MB, x86_64 23.3 MB. Follow-up: SHA-1 step switched to `apksigner` (v2/v3-signed APKs), `upload-artifact@v5`.

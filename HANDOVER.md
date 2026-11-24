@@ -2,14 +2,19 @@
 
 Self-contained resume guide. A fresh agent should be able to continue from this file alone.
 
-_Last updated: 2026-11-24 21:30 IST (session 2: accounts, mixes, data saver, downloads)_
+_Last updated: 2026-11-24 21:15 IST (session 3: CI bring-up, first green build)_
 
 ---
 
 ## 1. Current state & active phase
 
-- **Branch:** `feat/android-app`, committed **locally only**. `main` still holds only the CLI. Pushing to `origin` (github.com/chinxcode/chinTunes-cli) failed with 403 because the local GitHub login `Kakarot850` has read-only access (B-025). Once access is fixed, run `git push -u origin feat/android-app`. The push triggers CI.
-- **Active phase:** Phases 1–4 and 6 are implemented and **not yet verified**. The host has no Flutter SDK, so **CI is the first compiler**. Check the `build-apk` run for `feat/android-app` first.
+- **Repos:** `origin` = **github.com/Kakarot850/chinTunes-cli** (fork, Actions enabled). `upstream` = github.com/chinxcode/chinTunes-cli (read-only for us). Work on branch `feat/android-app`; `main` holds only the CLI.
+- **CI is green:** run [45426934986](https://github.com/Kakarot850/chinTunes-cli/actions/runs/45426934986).
+  - Core: `dart analyze` clean, 90/90 tests.
+  - App: `flutter analyze` 0 errors, 0 warnings (30 infos, B-028), 16/16 tests.
+  - Release APKs: arm64-v8a 22.0 MB, armeabi-v7a 20.0 MB, x86_64 23.3 MB, in artifact `chintunes-apks-<sha>`.
+  - Runner toolchain: Flutter 3.50.1 stable + Temurin JDK 21.
+- **Active phase:** Phase 5 QA. Everything compiles and the unit/widget tests pass, but **nothing has been run on a device yet**.
 - **Implemented:** search (JioSaavn + YouTube), home feed + Your mixes, collections, share links, background playback with gapless prefetch, queue/shuffle/repeat/sleep timer, likes, play history + Takeout import, local playlists, Google Sign-In (guest mode default), YouTube liked/playlists, endless mixes, Data Saver modes + data-saved meter, stream cache, offline downloads.
 - **Not started:** synced lyrics UI, WorkManager background downloads, custom icon, release signing.
 - **Host constraints:** Windows 11, 8 GB RAM, **no Android Studio, no emulator**. Build APKs in GitHub Actions only.
@@ -53,6 +58,11 @@ gh run view <run-id> --log-failed        # first thing to read on failure
 gh run download <run-id> -n chintunes-apks-<sha>
 ```
 
+**CI build gotchas already solved (don't undo):**
+- No `cache: gradle` on setup-java, because Gradle files don't exist before `flutter create` (B-026).
+- JDK **21**, because the bundled lint needs `List.removeLast` (B-030).
+- After `flutter create`, CI appends `apply(from = "compile_sdk_override.gradle")` to the generated `android/build.gradle.kts`, which forces plugin compileSdk to at least 36 (B-029). If you ever commit the generated Gradle files, keep that line.
+
 **Local (only if a Flutter SDK is installed):**
 ```bash
 cd packages/chintunes_core && dart pub get && dart analyze && dart test
@@ -63,8 +73,7 @@ flutter pub get && flutter analyze --no-fatal-infos && flutter test
 ## 4. Unfinished tasks & exact next immediate step
 
 **Next immediate step:**
-0. Resolve B-025 (push access), then `git push -u origin feat/android-app`.
-1. Open the latest `build-apk` run on `feat/android-app`. This is the first compile of everything. Fix each `dart analyze`, `dart test`, `flutter analyze` and `flutter test` failure, log it in BUG_REPORT.md, push again, and repeat until green. Then flip `[~]`→`[x]` in PROGRESS.md.
+1. Confirm the latest `build-apk` run is still green and that its "Print signing certificate fingerprints" step prints a `SHA-1 digest` line (switched to `apksigner` after run 45426934986).
 2. Install `app-arm64-v8a-release.apk` and verify:
    - a 320 kbps JioSaavn badge in High mode, and 96 kbps / Opus ~50 kbps in Ultra Saver
    - Start mix refills the queue endlessly
