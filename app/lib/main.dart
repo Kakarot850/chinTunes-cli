@@ -30,6 +30,7 @@ Future<void> main() async {
   final store = await LibraryStore.open();
   final usage = DataUsageMeter.fromJson(store.dataUsage());
   final core = CoreServices.create(dataMode: store.dataMode(), usage: usage);
+  core.resolver.sourcePreference = store.musicSource();
   // Persist data-saved totals as they change.
   usage.changes.listen((_) => unawaited(store.saveDataUsage(usage.toJson())));
 
@@ -59,6 +60,8 @@ Future<void> main() async {
       cache: cache,
       allowPrefetch: () => NetworkPolicy.allowPrefetch(core.resolver.dataMode, network.kind),
       cacheEnabled: store.streamCacheEnabled,
+      autoplayEnabled: store.autoplayEnabled,
+      autoplayMix: core.mixes.start,
       usage: usage,
     ),
     config: const AudioServiceConfig(

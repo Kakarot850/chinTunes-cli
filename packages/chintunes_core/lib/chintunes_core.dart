@@ -11,6 +11,7 @@ export 'src/catalog_service.dart';
 export 'src/data/artwork_sizer.dart';
 export 'src/data/data_mode.dart';
 export 'src/data/data_usage.dart';
+export 'src/data/music_source.dart';
 export 'src/data/stream_selection.dart';
 export 'src/downloads/byte_fetcher.dart';
 export 'src/downloads/download_manager.dart';

@@ -99,6 +99,34 @@ class MusicOnlyNotifier extends Notifier<bool> {
   }
 }
 
+class MusicSourceNotifier extends Notifier<MusicSource> {
+  @override
+  MusicSource build() => ref.watch(libraryStoreProvider).musicSource();
+
+  Future<void> set(MusicSource source) async {
+    if (source == state) return;
+    state = source;
+    ref.read(coreServicesProvider).resolver.sourcePreference = source;
+    await ref.read(libraryStoreProvider).setMusicSource(source);
+  }
+}
+
+/// Settings → Music source (search + cross-source playback, B-037).
+final musicSourceProvider = NotifierProvider<MusicSourceNotifier, MusicSource>(MusicSourceNotifier.new);
+
+class AutoplayNotifier extends Notifier<bool> {
+  @override
+  bool build() => ref.watch(libraryStoreProvider).autoplayEnabled();
+
+  Future<void> set(bool value) async {
+    state = value;
+    await ref.read(libraryStoreProvider).setAutoplayEnabled(value);
+  }
+}
+
+/// Settings → "Autoplay similar songs" when the queue runs out (B-038).
+final autoplayProvider = NotifierProvider<AutoplayNotifier, bool>(AutoplayNotifier.new);
+
 class StreamCacheNotifier extends Notifier<bool> {
   @override
   bool build() => ref.watch(libraryStoreProvider).streamCacheEnabled();
@@ -189,7 +217,8 @@ final searchResultsProvider =
   final link = ref.keepAlive();
   final timer = Timer(const Duration(minutes: 2), link.close);
   ref.onDispose(timer.cancel);
-  return ref.watch(coreServicesProvider).search.search(query, filter: filter);
+  final source = ref.watch(musicSourceProvider); // re-run when the source changes
+  return ref.watch(coreServicesProvider).search.search(query, filter: filter, source: source);
 });
 
 final lyricsProvider = FutureProvider.autoDispose.family<Lyrics?, Track>((ref, track) {

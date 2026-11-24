@@ -36,6 +36,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final mode = ref.watch(dataModeProvider);
+    final source = ref.watch(musicSourceProvider);
     final usage = ref.watch(dataUsageProvider).valueOrNull ?? const DataUsageSnapshot();
     final storage = ref.watch(storageUsageProvider).valueOrNull;
     final network = ref.watch(networkKindProvider).valueOrNull ?? NetworkKind.wifi;
@@ -47,6 +48,26 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom + 24),
         children: [
+          const SectionHeader('Music source'),
+          for (final s in MusicSource.values)
+            ListTile(
+              selected: s == source,
+              selectedColor: AppColors.textPrimary,
+              leading: Icon(
+                s == source ? Icons.radio_button_checked_rounded : Icons.radio_button_unchecked_rounded,
+                color: s == source ? AppColors.accent : AppColors.textTertiary,
+              ),
+              title: Text(s.label),
+              subtitle: Text(s.description),
+              onTap: () => unawaited(ref.read(musicSourceProvider.notifier).set(s)),
+            ),
+          SwitchListTile(
+            secondary: const Icon(Icons.all_inclusive_rounded),
+            title: const Text('Autoplay similar songs'),
+            subtitle: const Text('When the queue ends, keep playing a mix based on the last song.'),
+            value: ref.watch(autoplayProvider),
+            onChanged: (v) => unawaited(ref.read(autoplayProvider.notifier).set(v)),
+          ),
           const SectionHeader('Data mode'),
           for (final m in DataMode.values)
             ListTile(

@@ -18,11 +18,47 @@ import 'player_controls.dart';
 import 'queue_sheet.dart';
 import 'sleep_timer_sheet.dart';
 
-class NowPlayingScreen extends ConsumerWidget {
+class NowPlayingScreen extends ConsumerStatefulWidget {
   const NowPlayingScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<NowPlayingScreen> createState() => _NowPlayingScreenState();
+}
+
+class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
+  final DraggableScrollableController _queue = DraggableScrollableController();
+  bool _queueOpen = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _queue.addListener(() {
+      final open = _queue.isAttached && _queue.size > 0.3;
+      if (open != _queueOpen) setState(() => _queueOpen = open);
+    });
+  }
+
+  @override
+  void dispose() {
+    _queue.dispose();
+    super.dispose();
+  }
+
+  void _setQueue({required bool open}) {
+    if (!_queue.isAttached) return;
+    // Same peek fraction QueuePanel uses (sheet bounds must not be exceeded).
+    final peek = ((kQueuePeekHeight + MediaQuery.paddingOf(context).bottom) / MediaQuery.sizeOf(context).height)
+        .clamp(0.05, 0.4)
+        .toDouble();
+    unawaited(_queue.animateTo(
+      open ? kQueueMaxSize : peek,
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOutCubic,
+    ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final item = ref.watch(mediaItemProvider).valueOrNull;
     final handler = ref.read(audioHandlerProvider);
     final track = handler.currentTrack;
@@ -45,9 +81,17 @@ class NowPlayingScreen extends ConsumerWidget {
     final sleep = ref.watch(sleepTimerProvider);
     final theme = Theme.of(context);
 
-    return Scaffold(
+    return PopScope(
+      // Back with the queue open collapses it first.
+      canPop: !_queueOpen,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _setQueue(open: false);
+      },
+      child: Scaffold(
       backgroundColor: AppColors.background,
-      body: GestureDetector(
+      body: Stack(
+        children: [
+          GestureDetector(
         onVerticalDragEnd: (d) {
           if ((d.primaryVelocity ?? 0) > 300) context.pop();
         },
@@ -103,7 +147,7 @@ class NowPlayingScreen extends ConsumerWidget {
                       child: LayoutBuilder(
                         builder: (context, c) {
                           // Cap by height too so small phones never overflow the column.
-                          final maxByHeight = MediaQuery.sizeOf(context).height * 0.42;
+                          final maxByHeight = MediaQuery.sizeOf(context).height * 0.38;
                           final size = c.maxWidth.clamp(0.0, maxByHeight.clamp(160.0, 420.0)).toDouble();
                           return AnimatedSwitcher(
                             duration: const Duration(milliseconds: 220),
@@ -187,16 +231,22 @@ class NowPlayingScreen extends ConsumerWidget {
                         tooltip: 'Queue',
                         color: AppColors.textSecondary,
                         icon: const Icon(Icons.format_list_bulleted_rounded),
-                        onPressed: () => unawaited(showQueueSheet(context)),
+                        onPressed: () => _setQueue(open: true),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  // Keep the controls above the collapsed "Up next" strip.
+                  const SizedBox(height: kQueuePeekHeight + 8),
                 ],
               ),
             ),
           ),
         ),
+      ),
+          // Drag up from the bottom to reveal the queue.
+          QueuePanel(controller: _queue),
+        ],
+      ),
       ),
     );
   }

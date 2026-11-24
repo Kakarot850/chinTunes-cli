@@ -58,6 +58,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final isLink = _query.isNotEmpty && LinkRouter.looksLikeUrl(_query);
+    // Albums / playlists / artists come from JioSaavn only.
+    final youtubeOnly = ref.watch(musicSourceProvider) == MusicSource.youtube;
+    final filter = youtubeOnly ? SearchFilter.songs : _filter;
 
     return Scaffold(
       appBar: AppBar(
@@ -73,7 +76,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             _commit();
           },
           decoration: InputDecoration(
-            hintText: 'Songs, albums, artists or a link',
+            hintText: youtubeOnly ? 'Search YouTube or paste a link' : 'Songs, albums, artists or a link',
             prefixIcon: const Icon(Icons.search_rounded),
             suffixIcon: _controller.text.isEmpty
                 ? null
@@ -90,7 +93,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       ),
       body: Column(
         children: [
-          if (_query.isNotEmpty && !isLink)
+          if (_query.isNotEmpty && !isLink && !youtubeOnly)
             SizedBox(
               height: 48,
               child: ListView(
@@ -118,7 +121,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 ? _RecentSearches(onPick: _setQuery)
                 : isLink
                     ? _LinkResult(url: _query, onUsed: _commit)
-                    : _Results(query: _query, filter: _filter, onUsed: _commit),
+                    : _Results(query: _query, filter: filter, onUsed: _commit),
           ),
         ],
       ),

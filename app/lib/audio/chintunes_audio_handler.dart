@@ -42,12 +42,16 @@ class ChinTunesAudioHandler extends BaseAudioHandler with SeekHandler {
     AudioCache? cache,
     bool Function()? allowPrefetch,
     bool Function()? cacheEnabled,
+    bool Function()? autoplayEnabled,
+    Future<MixSession> Function(Track seed)? autoplayMix,
     DataUsageMeter? usage,
   })  : _resolver = resolver,
         _localize = localize ?? ((t) => t),
         _cache = cache,
         _allowPrefetch = allowPrefetch ?? (() => true),
         _cacheEnabled = cacheEnabled ?? (() => true),
+        _autoplayEnabled = autoplayEnabled ?? (() => false),
+        _autoplayMix = autoplayMix,
         _usage = usage {
     _subs.addAll([
       _player.playbackEventStream.listen((_) => _broadcastState(), onError: _onPlayerError),
@@ -70,6 +74,8 @@ class ChinTunesAudioHandler extends BaseAudioHandler with SeekHandler {
   final AudioCache? _cache;
   final bool Function() _allowPrefetch;
   final bool Function() _cacheEnabled;
+  final bool Function() _autoplayEnabled;
+  final Future<MixSession> Function(Track seed)? _autoplayMix;
   final DataUsageMeter? _usage;
 
   final AudioPlayer _player = AudioPlayer();
@@ -91,7 +97,12 @@ class ChinTunesAudioHandler extends BaseAudioHandler with SeekHandler {
   int _prefetchToken = 0;
   int _consecutiveErrors = 0;
   MixSession? _mix;
+  bool _mixIsAutoplay = false;
   bool _refilling = false;
+
+  /// Bumped whenever the queue is replaced, so late autoplay results for an
+  /// old queue are dropped.
+  int _queueGeneration = 0;
 
   // ------------------------------------------------------------ public API
 
@@ -115,8 +126,12 @@ class ChinTunesAudioHandler extends BaseAudioHandler with SeekHandler {
   bool get pauseAtEndOfTrack => _pauseAtEndOfTrack;
   DataMode get dataMode => _resolver.dataMode;
 
-  /// Title of the running endless mix, or null.
-  String? get mixTitle => _mix?.title;
+  /// Label of the running endless mix / autoplay, or null.
+  String? get mixTitle {
+    final mix = _mix;
+    if (mix == null) return null;
+    return _mixIsAutoplay ? 'Autoplay · similar to ${mix.seed.title}' : 'Endless mix · ${mix.title}';
+  }
 
   /// Applies a new Data Mode; affects the next stream that is resolved.
   Future<void> setDataMode(DataMode mode) async {
@@ -130,6 +145,8 @@ class ChinTunesAudioHandler extends BaseAudioHandler with SeekHandler {
   Future<void> playTracks(List<Track> tracks, {int startIndex = 0, bool? shuffle}) async {
     if (tracks.isEmpty) return;
     _mix = null;
+    _mixIsAutoplay = false;
+    _queueGeneration++;
     if (shuffle != null) _queue.setShuffle(shuffle);
     _queue.setTracks(tracks, startIndex: startIndex);
     _publishQueue();
@@ -144,6 +161,8 @@ class ChinTunesAudioHandler extends BaseAudioHandler with SeekHandler {
     _queue.setShuffle(false);
     _queue.setTracks(tracks);
     _mix = session;
+    _mixIsAutoplay = false;
+    _queueGeneration++;
     _publishQueue();
     await _loadCurrent();
   }
@@ -481,10 +500,14 @@ class ChinTunesAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   void _maybeRefillMix() {
-    final mix = _mix;
-    if (mix == null || _refilling) return;
+    if (_refilling || _queue.isEmpty) return;
     final order = _queue.order;
     final remaining = order.length - 1 - order.indexOf(_queue.currentIndex);
+    final mix = _mix;
+    if (mix == null) {
+      _maybeStartAutoplay(remaining);
+      return;
+    }
     if (remaining > 3) return;
     _refilling = true;
     unawaited(() async {
@@ -498,6 +521,38 @@ class ChinTunesAudioHandler extends BaseAudioHandler with SeekHandler {
         await _syncPrefetch();
       } catch (_) {
         // Offline / InnerTube hiccup: retried on the next track change.
+      } finally {
+        _refilling = false;
+      }
+    }());
+  }
+
+  /// Autoplay (B-038): when a normal queue (album, search results…) is about
+  /// to run out, continue with a mix seeded from its last track. Skipped with
+  /// repeat on (the queue loops) or when disabled in Settings.
+  void _maybeStartAutoplay(int remaining) {
+    final start = _autoplayMix;
+    if (start == null || remaining > 2 || _repeat != RepeatMode.off || !_autoplayEnabled()) return;
+    final generation = _queueGeneration;
+    final seed = _queue.trackAt(_queue.order.last);
+    _refilling = true;
+    unawaited(() async {
+      try {
+        final session = await start(seed);
+        if (generation != _queueGeneration || _mix != null) return; // queue replaced meanwhile
+        session.markSeen(_queue.tracks);
+        final fresh = session.initialTracks.where((t) => !_queue.tracks.contains(t)).toList();
+        if (fresh.isEmpty) return;
+        _mix = session;
+        _mixIsAutoplay = true;
+        for (final t in fresh) {
+          _queue.add(t);
+        }
+        _publishQueue();
+        _broadcastState();
+        await _syncPrefetch();
+      } catch (_) {
+        // No mix for this seed / offline: the queue simply ends.
       } finally {
         _refilling = false;
       }

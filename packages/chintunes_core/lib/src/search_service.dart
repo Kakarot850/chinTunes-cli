@@ -1,3 +1,4 @@
+import 'data/music_source.dart';
 import 'jiosaavn/jiosaavn_client.dart';
 import 'models/collection.dart';
 import 'models/search_results.dart';
@@ -15,7 +16,13 @@ class SearchService {
   final YouTubeSource _youtube;
   final bool includeYouTube;
 
-  Future<SearchResults> search(String query, {SearchFilter filter = SearchFilter.songs}) async {
+  /// [source] limits song results (Settings → Music source). Albums,
+  /// playlists and artists always come from JioSaavn.
+  Future<SearchResults> search(
+    String query, {
+    SearchFilter filter = SearchFilter.songs,
+    MusicSource source = MusicSource.auto,
+  }) async {
     final q = query.trim();
     if (q.isEmpty) return SearchResults.empty;
     final errors = <String>[];
@@ -31,9 +38,11 @@ class SearchService {
 
     switch (filter) {
       case SearchFilter.songs:
-        final songsF = guard<Track>('JioSaavn', () => _jiosaavn.searchSongs(q));
-        final ytF = includeYouTube
-            ? guard<Track>('YouTube', () => _youtube.search(q, limit: 8))
+        final songsF = source.searchesJioSaavn
+            ? guard<Track>('JioSaavn', () => _jiosaavn.searchSongs(q))
+            : Future.value(<Track>[]);
+        final ytF = (includeYouTube && source.searchesYouTube)
+            ? guard<Track>('YouTube', () => _youtube.search(q, limit: source == MusicSource.youtube ? 20 : 8))
             : Future.value(<Track>[]);
         final songs = await songsF;
         final yt = await ytF;
