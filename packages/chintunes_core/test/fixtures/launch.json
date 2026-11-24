@@ -1,0 +1,124 @@
+{
+ "new_trending": [
+  {
+   "id": "76462070",
+   "title": "Emraan Hashmi Sad Love Hits",
+   "subtitle": "",
+   "type": "album",
+   "perma_url": "https://www.jiosaavn.com/album/emraan-hashmi-sad-love-hits/Euywb8XVFVo_",
+   "image": "https://c.saavncdn.com/732/Emraan-Hashmi-Sad-Love-Hits-Hindi-2026-20260604155755-150x150.jpg?bch=498757"
+  },
+  {
+   "id": "158221880",
+   "title": "Best Of Retro",
+   "subtitle": "47.9K Fans",
+   "type": "playlist",
+   "perma_url": "https://www.jiosaavn.com/featured/best-of-retro/IFTYFbu2anRuOxiEGmm6lQ__",
+   "image": "https://c.saavncdn.com/editorial/BestOfRetro_20261113052506.jpg?bch=1794549386"
+  },
+  {
+   "id": "79121261",
+   "title": "Awarapan 2",
+   "subtitle": "",
+   "type": "album",
+   "perma_url": "https://www.jiosaavn.com/album/awarapan-2/e9NTAB1tQ9M_",
+   "image": "https://c.saavncdn.com/820/Awarapan-2-Hindi-2026-20260929184517-150x150.jpg?bch=498757"
+  }
+ ],
+ "charts": [
+  {
+   "id": "1134543272",
+   "title": "Hindi: India Superhits Top 50",
+   "subtitle": null,
+   "type": "playlist",
+   "perma_url": "https://www.jiosaavn.com/featured/hindi-india-superhits-top-50/zlJfJYVuyjpxWb5,FqsjKg__",
+   "image": "https://c.saavncdn.com/editorial/Hindi-IndiaSuperhitsTop50_20261113063216.jpg"
+  },
+  {
+   "id": "1134548194",
+   "title": "India Superhits Top 50",
+   "subtitle": null,
+   "type": "playlist",
+   "perma_url": "https://www.jiosaavn.com/featured/india-superhits-top-50/VuJUPQ9ch77bB,U5Yp5iAA__",
+   "image": "https://c.saavncdn.com/editorial/IndiaSuperhitsTop50_20261120072316.jpg"
+  },
+  {
+   "id": "946682072",
+   "title": "Most Searched Songs - Hindi",
+   "subtitle": "JioSaavn",
+   "type": "playlist",
+   "perma_url": "https://www.jiosaavn.com/featured/most-searched-songs-hindi/csv-SfcHUmHc1EngHtQQ2g__",
+   "image": "https://c.saavncdn.com/editorial/MostSearchedSongsHindi_20261123111206.jpg"
+  }
+ ],
+ "top_playlists": [
+  {
+   "id": "1080335349",
+   "title": "Hindi Hit Songs",
+   "subtitle": "Just Updated",
+   "type": "playlist",
+   "perma_url": "https://www.jiosaavn.com/featured/hindi-hit-songs/ZodsPn39CSjwxP8tCU-flw__",
+   "image": "https://c.saavncdn.com/editorial/HindiHitSongs_20261119063259.jpg"
+  },
+  {
+   "id": "903166403",
+   "title": "Best Of Romance - Hindi",
+   "subtitle": "262.5K Followers",
+   "type": "playlist",
+   "perma_url": "https://www.jiosaavn.com/featured/best-of-romance-hindi/SBKnUgjNeMIwkg5tVhI3fw__",
+   "image": "https://c.saavncdn.com/editorial/BestOfRomanceHindi_20261113051952.jpg"
+  },
+  {
+   "id": "902306817",
+   "title": "Viral Nation",
+   "subtitle": "Just Updated",
+   "type": "playlist",
+   "perma_url": "https://www.jiosaavn.com/featured/viral-nation/tfVkYjaAbZJieSJqt9HmOQ__",
+   "image": "https://c.saavncdn.com/editorial/ViralNation_20261118110918.jpg"
+  }
+ ],
+ "new_albums": [
+  {
+   "id": "28jj34zj",
+   "title": "Ji Ji Re Ji (From &quot;Eetha&quot;)",
+   "subtitle": "Ajay-Atul, Amitabh Bhattacharya - Ji Ji Re Ji (From &quot;Eetha&quot;)",
+   "type": "song",
+   "perma_url": "https://www.jiosaavn.com/song/ji-ji-re-ji-from-eetha/QlABW0cETVk",
+   "image": "https://c.saavncdn.com/881/Ji-Ji-Re-Ji-From-Eetha-Hindi-2026-20261117110734-150x150.jpg"
+  },
+  {
+   "id": "QcfFd62t",
+   "title": "Tu Mil Jaaye (From &quot;KING&quot;)",
+   "subtitle": "Sachin-Jigar, Ed Sheeran, Kumaar, Arijit Singh, Madhubanti Bagchi - Tu Mil Jaaye (From &quot;KING&quot;)",
+   "type": "song",
+   "perma_url": "https://www.jiosaavn.com/song/tu-mil-jaaye-from-king/IQsNdxAGBUc",
+   "image": "https://c.saavncdn.com/320/Tu-Mil-Jaaye-From-KING-Hindi-2026-20261031131042-150x150.jpg"
+  },
+  {
+   "id": "JVvWVXWE",
+   "title": "Madirapan (From &quot;Maatrubhumi: May War Rest in Peace&quot;)",
+   "subtitle": "Himesh Reshammiya - Madirapan (From &quot;Maatrubhumi: May War Rest in Peace&quot;)",
+   "type": "song",
+   "perma_url": "https://www.jiosaavn.com/song/madirapan-from-maatrubhumi-may-war-rest-in-peace/Oj4dZiJoYHY",
+   "image": "https://c.saavncdn.com/198/Madirapan-From-Maatrubhumi-May-War-Rest-in-Peace-Hindi-2026-20261119175453-150x150.jpg"
+  }
+ ],
+ "modules": {
+  "new_trending": {
+   "title": "Trending Now",
+   "position": 1
+  },
+  "charts": {
+   "title": "Top Charts",
+   "position": 2
+  },
+  "new_albums": {
+   "title": "New Releases",
+   "position": 3
+  },
+  "top_playlists": {
+   "title": "Editorial Picks",
+   "position": 4
+  }
+ }
+}

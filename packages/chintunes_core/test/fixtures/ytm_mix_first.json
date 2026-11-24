@@ -1,0 +1,511 @@
+{
+ "contents": {
+  "singleColumnMusicWatchNextResultsRenderer": {
+   "tabbedRenderer": {
+    "watchNextTabbedResultsRenderer": {
+     "tabs": [
+      {
+       "tabRenderer": {
+        "content": {
+         "musicQueueRenderer": {
+          "content": {
+           "playlistPanelRenderer": {
+            "title": null,
+            "playlistId": "RDAMVMBddP6PYo2gs",
+            "contents": [
+             {
+              "playlistPanelVideoRenderer": {
+               "videoId": "BddP6PYo2gs",
+               "title": {
+                "runs": [
+                 {
+                  "text": "Kesariya (From \"Brahmastra\")"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "Arijit Singh",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCDxKh1gFWeYsqePvgVzmPoQ",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 }
+                ]
+               },
+               "shortBylineText": {
+                "runs": [
+                 {
+                  "text": "Arijit Singh"
+                 }
+                ]
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "2:53"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": [
+                 {
+                  "url": "https://i.ytimg.com/vi/BddP6PYo2gs/hqdefault.jpg?sqp=-oaymwEWCJADEOEBIAQqCggAEOADGC0guwJIWg&rs=AMzJL3mc8JSaq6eAqHnr2ygiOPwl3xbXOA",
+                  "width": 400,
+                  "height": 225
+                 },
+                 {
+                  "url": "https://i.ytimg.com/vi/BddP6PYo2gs/hq720.jpg?sqp=-oaymwEKCKAGEMIDIABIWg&rs=AMzJL3mqAqd_b281Woq9wZx3axU_9FVpPQ",
+                  "width": 800,
+                  "height": 450
+                 },
+                 {
+                  "url": "https://i.ytimg.com/vi/BddP6PYo2gs/hq720.jpg?sqp=-oaymwEKCNUGEN8DIABIWg&rs=AMzJL3mF4gd9SxCUSIlImg9uNrPIgBZo5Q",
+                  "width": 853,
+                  "height": 479
+                 }
+                ]
+               }
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "videoId": "ElZfdU54Cp8",
+               "title": {
+                "runs": [
+                 {
+                  "text": "Apna Bana Le"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "Amitabh Bhattacharya",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCRQmZ4lsrzXAyvKRV1DSMYA",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 }
+                ]
+               },
+               "shortBylineText": {
+                "runs": [
+                 {
+                  "text": "Amitabh Bhattacharya"
+                 }
+                ]
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "3:25"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": [
+                 {
+                  "url": "https://i.ytimg.com/vi/ElZfdU54Cp8/hqdefault.jpg?sqp=-oaymwEWCJADEOEBIAQqCggAEOADGC0guwJIWg&rs=AMzJL3nr346aZyoNXfrMFh82vAFdcG-COw",
+                  "width": 400,
+                  "height": 225
+                 },
+                 {
+                  "url": "https://i.ytimg.com/vi/ElZfdU54Cp8/hq720.jpg?sqp=-oaymwEKCKAGEMIDIABIWg&rs=AMzJL3n1IZzmfAHW-mCTN52kiRnfSo1FnQ",
+                  "width": 800,
+                  "height": 450
+                 },
+                 {
+                  "url": "https://i.ytimg.com/vi/ElZfdU54Cp8/hq720.jpg?sqp=-oaymwEKCNUGEN8DIABIWg&rs=AMzJL3kxnG5UcPhI5yWz-wKt5A-QNSz8Fw",
+                  "width": 853,
+                  "height": 479
+                 }
+                ]
+               }
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "videoId": "hXh35CtnSyU",
+               "title": {
+                "runs": [
+                 {
+                  "text": "Bulleya (Instrumental)"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "Ajay Singha",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCjJ5kg0OBpMQTgBzO_jMgcw",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 }
+                ]
+               },
+               "shortBylineText": {
+                "runs": [
+                 {
+                  "text": "Ajay Singha"
+                 }
+                ]
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "3:13"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": [
+                 {
+                  "url": "https://i.ytimg.com/vi/hXh35CtnSyU/hqdefault.jpg?sqp=-oaymwEWCJADEOEBIAQqCggAEOADGC0guwJIWg&rs=AMzJL3kaeSJ_ekQVgBRDfwvq-jM8B0Thpg",
+                  "width": 400,
+                  "height": 225
+                 },
+                 {
+                  "url": "https://i.ytimg.com/vi/hXh35CtnSyU/hq720.jpg?sqp=-oaymwEKCKAGEMIDIABIWg&rs=AMzJL3kTnnpGgn-UxvaGGt0Ta2HY0H_SlA",
+                  "width": 800,
+                  "height": 450
+                 },
+                 {
+                  "url": "https://i.ytimg.com/vi/hXh35CtnSyU/hq720.jpg?sqp=-oaymwEKCNUGEN8DIABIWg&rs=AMzJL3mQ62LHZ1yzWl9nL84f8o5Jfs02eg",
+                  "width": 853,
+                  "height": 479
+                 }
+                ]
+               }
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "videoId": "HqUeSjsYLNU",
+               "title": {
+                "runs": [
+                 {
+                  "text": "Makhna"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "Yasser Desai",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCUfq1gkBWMPKfC_DmOj8QJQ",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 }
+                ]
+               },
+               "shortBylineText": {
+                "runs": [
+                 {
+                  "text": "Yasser Desai"
+                 }
+                ]
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "3:14"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": [
+                 {
+                  "url": "https://i.ytimg.com/vi/HqUeSjsYLNU/hqdefault.jpg?sqp=-oaymwEWCJADEOEBIAQqCggAEOADGC0guwJIWg&rs=AMzJL3lae6U2DxHdhvwf3i4IP66m3Md5qw",
+                  "width": 400,
+                  "height": 225
+                 },
+                 {
+                  "url": "https://i.ytimg.com/vi/HqUeSjsYLNU/hq720.jpg?sqp=-oaymwEKCKAGEMIDIABIWg&rs=AMzJL3l1C4QOw-NZIZL7PKyt1K4Bau53yg",
+                  "width": 800,
+                  "height": 450
+                 },
+                 {
+                  "url": "https://i.ytimg.com/vi/HqUeSjsYLNU/hq720.jpg?sqp=-oaymwEKCNUGEN8DIABIWg&rs=AMzJL3nmZnf-Zy7lHIWve30ovQcID-yvLA",
+                  "width": 853,
+                  "height": 479
+                 }
+                ]
+               }
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "videoId": "SAcpESN_Fk4",
+               "title": {
+                "runs": [
+                 {
+                  "text": "Dil Diyan Gallan (From \"Tiger Zinda Hai\")"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "Vishal-Shekhar",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCWXJyrk1diAufFuTHCTfQ2A",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " & "
+                 },
+                 {
+                  "text": "Atif Aslam",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCVGomUS__PL0c4jDXa0QwXA",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "858M views"
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "4.3M likes"
+                 }
+                ]
+               },
+               "shortBylineText": {
+                "runs": [
+                 {
+                  "text": "Vishal-Shekhar"
+                 },
+                 {
+                  "text": " & "
+                 },
+                 {
+                  "text": "Atif Aslam"
+                 }
+                ]
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "3:05"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": [
+                 {
+                  "url": "https://i.ytimg.com/vi/SAcpESN_Fk4/hqdefault.jpg?sqp=-oaymwEWCJADEOEBIAQqCggAEOADGC0guwJIWg&rs=AMzJL3n-CFKEHqLrWVD6aSMh39oFaNfXXA",
+                  "width": 400,
+                  "height": 225
+                 },
+                 {
+                  "url": "https://i.ytimg.com/vi/SAcpESN_Fk4/hq720.jpg?sqp=-oaymwEKCKAGEMIDIABIWg&rs=AMzJL3n_jmEc0RCvX-IoomL7Lz_xdYbZmA",
+                  "width": 800,
+                  "height": 450
+                 },
+                 {
+                  "url": "https://i.ytimg.com/vi/SAcpESN_Fk4/hq720.jpg?sqp=-oaymwEKCNUGEN8DIABIWg&rs=AMzJL3lknNWLwZdyUkIPUhuvMK-XvDqJIA",
+                  "width": 853,
+                  "height": 479
+                 }
+                ]
+               }
+              }
+             },
+             {
+              "playlistPanelVideoWrapperRenderer": {
+               "primaryRenderer": {
+                "playlistPanelVideoRenderer": {
+                 "videoId": "3pz_bHeZLkg",
+                 "title": {
+                  "runs": [
+                   {
+                    "text": "Apna Bana Le - Arijit Singh | Bhediya | Varun Dhawan & Kriti Sanon | Sachin-Jigar | Lyrical"
+                   }
+                  ]
+                 },
+                 "longBylineText": {
+                  "runs": [
+                   {
+                    "text": "Karthik",
+                    "navigationEndpoint": {
+                     "browseEndpoint": {
+                      "browseId": "UC_WJkGXW3szoVG1hx6c0VZw",
+                      "browseEndpointContextSupportedConfigs": {
+                       "browseEndpointContextMusicConfig": {
+                        "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                       }
+                      }
+                     }
+                    }
+                   }
+                  ]
+                 },
+                 "shortBylineText": {
+                  "runs": [
+                   {
+                    "text": "Karthik"
+                   }
+                  ]
+                 },
+                 "lengthText": {
+                  "runs": [
+                   {
+                    "text": "4:27"
+                   }
+                  ]
+                 },
+                 "thumbnail": {
+                  "thumbnails": [
+                   {
+                    "url": "https://i.ytimg.com/vi/3pz_bHeZLkg/hqdefault.jpg?sqp=-oaymwEWCJADEOEBIAQqCggAEOADGC0guwJIWg&rs=AMzJL3l4WaOwdiK20hopuMmWle37tIo7vg",
+                    "width": 400,
+                    "height": 225
+                   },
+                   {
+                    "url": "https://i.ytimg.com/vi/3pz_bHeZLkg/hq720.jpg?sqp=-oaymwEKCKAGEMIDIABIWg&rs=AMzJL3kpa-3waQzLgiJE_LMYLNNmySrQOA",
+                    "width": 800,
+                    "height": 450
+                   },
+                   {
+                    "url": "https://i.ytimg.com/vi/3pz_bHeZLkg/hq720.jpg?sqp=-oaymwEKCNUGEN8DIABIWg&rs=AMzJL3moT2w7Dkwisft3D0yLLOZbkw315A",
+                    "width": 853,
+                    "height": 479
+                   }
+                  ]
+                 }
+                }
+               },
+               "counterpart": [
+                {
+                 "counterpartRenderer": {
+                  "playlistPanelVideoRenderer": {
+                   "videoId": "COUNTERPART",
+                   "title": {
+                    "runs": [
+                     {
+                      "text": "Apna Bana Le - Arijit Singh | Bhediya | Varun Dhawan & Kriti Sanon | Sachin-Jigar | Lyrical"
+                     }
+                    ]
+                   },
+                   "longBylineText": {
+                    "runs": [
+                     {
+                      "text": "Karthik",
+                      "navigationEndpoint": {
+                       "browseEndpoint": {
+                        "browseId": "UC_WJkGXW3szoVG1hx6c0VZw",
+                        "browseEndpointContextSupportedConfigs": {
+                         "browseEndpointContextMusicConfig": {
+                          "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                         }
+                        }
+                       }
+                      }
+                     }
+                    ]
+                   },
+                   "shortBylineText": {
+                    "runs": [
+                     {
+                      "text": "Karthik"
+                     }
+                    ]
+                   },
+                   "lengthText": {
+                    "runs": [
+                     {
+                      "text": "4:27"
+                     }
+                    ]
+                   },
+                   "thumbnail": {
+                    "thumbnails": [
+                     {
+                      "url": "https://i.ytimg.com/vi/3pz_bHeZLkg/hqdefault.jpg?sqp=-oaymwEWCJADEOEBIAQqCggAEOADGC0guwJIWg&rs=AMzJL3l4WaOwdiK20hopuMmWle37tIo7vg",
+                      "width": 400,
+                      "height": 225
+                     },
+                     {
+                      "url": "https://i.ytimg.com/vi/3pz_bHeZLkg/hq720.jpg?sqp=-oaymwEKCKAGEMIDIABIWg&rs=AMzJL3kpa-3waQzLgiJE_LMYLNNmySrQOA",
+                      "width": 800,
+                      "height": 450
+                     },
+                     {
+                      "url": "https://i.ytimg.com/vi/3pz_bHeZLkg/hq720.jpg?sqp=-oaymwEKCNUGEN8DIABIWg&rs=AMzJL3moT2w7Dkwisft3D0yLLOZbkw315A",
+                      "width": 853,
+                      "height": 479
+                     }
+                    ]
+                   }
+                  }
+                 }
+                }
+               ]
+              }
+             }
+            ],
+            "continuations": [
+             {
+              "nextRadioContinuationData": {
+               "continuation": "CONT_TOKEN_1"
+              }
+             }
+            ]
+           }
+          }
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  }
+ }
+}
