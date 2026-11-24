@@ -86,6 +86,14 @@ jobs:
       - name: Generate missing Android platform files
         run: flutter create --platforms=android --org com.chintunes --project-name chintunes .
 
+      # Old-major plugins compile against android-34; force >= 36 (B-029).
+      - name: Apply compileSdk override to generated Gradle root
+        run: |
+          test -f android/build.gradle.kts
+          grep -q "compile_sdk_override.gradle" android/build.gradle.kts \
+            || printf '\n// chinTunes CI (B-029)\napply(from = "compile_sdk_override.gradle")\n' >> android/build.gradle.kts
+          tail -4 android/build.gradle.kts
+
       - name: Verify committed Android files survived
         run: |
           grep -q "AudioServiceActivity" android/app/src/main/kotlin/com/chintunes/chintunes/MainActivity.kt

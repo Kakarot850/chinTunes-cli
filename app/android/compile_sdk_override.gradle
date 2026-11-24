@@ -1,0 +1,31 @@
+// chinTunes: raise compileSdk of Android library subprojects (Flutter plugins).
+//
+// Plugins pinned to older majors for API stability (file_picker 8,
+// connectivity_plus 6, just_audio 0.9 …) still compile against android-34,
+// while newer transitive deps such as flutter_plugin_android_lifecycle require
+// every consumer to compile against API 36+ (AGP `checkAarMetadata`, B-029).
+// compileSdk only affects compilation; minSdk / targetSdk / runtime behaviour
+// are untouched.
+//
+// Applied from the generated android/build.gradle.kts by CI:
+//   apply(from = "compile_sdk_override.gradle")
+def minCompileSdk = 36
+
+subprojects { p ->
+    def bump = {
+        def android = p.extensions.findByName('android')
+        if (android == null) return
+        def current = android.compileSdk
+        if (current == null || current < minCompileSdk) {
+            android.compileSdk = minCompileSdk
+        }
+    }
+    // Our afterEvaluate is registered before the plugin's own build script
+    // runs, so it executes before AGP finalises the DSL. `:app` may already be
+    // evaluated (root script calls evaluationDependsOn(":app")).
+    if (p.state.executed) {
+        bump()
+    } else {
+        p.afterEvaluate { bump() }
+    }
+}
